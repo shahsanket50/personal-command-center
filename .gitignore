@@ -1,0 +1,18 @@
+# Environment — never commit secrets
+.env
+
+# OAuth token storage
+ms-token.json
+google-credentials.json
+
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build output
+client/dist/
+client/.vite/
+
+# OS
+.DS_Store
