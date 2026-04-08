@@ -150,7 +150,7 @@ function mapTask(page) {
   return {
     id: page.id,
     title: titleProp?.title?.[0]?.plain_text ?? '',
-    status: props.Status?.select?.name ?? 'Todo',
+    status: props.Status?.status?.name ?? 'Not started',
     dueDate: props['Due Date']?.date?.start ?? null,
   };
 }
@@ -180,7 +180,7 @@ export async function getOverdueTasks() {
     filter: {
       and: [
         { property: 'Due Date', date: { before: today } },
-        { property: 'Status', select: { does_not_equal: 'Done' } },
+        { property: 'Status', status: { does_not_equal: 'Done' } },
       ],
     },
   });
@@ -194,8 +194,8 @@ export async function createTask(title, dueDate) {
   if (!dbId) throw new Error('NOTION_DB_TASKS is not set');
 
   const properties = {
-    Name: { title: [{ type: 'text', text: { content: title } }] },
-    Status: { select: { name: 'Todo' } },
+    Title: { title: [{ type: 'text', text: { content: title } }] },
+    Status: { status: { name: 'Not started' } },
   };
 
   if (dueDate) {
@@ -215,10 +215,10 @@ export async function updateTask(pageId, updates) {
 
   const properties = {};
   if (updates.status !== undefined) {
-    properties['Status'] = { select: { name: updates.status } };
+    properties['Status'] = { status: { name: updates.status } };
   }
   if (updates.title !== undefined) {
-    properties['Name'] = { title: [{ type: 'text', text: { content: updates.title } }] };
+    properties['Title'] = { title: [{ type: 'text', text: { content: updates.title } }] };
   }
   if ('dueDate' in updates) {
     properties['Due Date'] = updates.dueDate ? { date: { start: updates.dueDate } } : { date: null };

@@ -175,7 +175,7 @@ export default function NotesTasks({ theme }) {
 
   // Toggle complete
   const handleToggle = async (task) => {
-    const newStatus = task.status === 'Done' ? 'Todo' : 'Done';
+    const newStatus = task.status === 'Done' ? 'Not started' : 'Done';
     setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, status: newStatus } : t)));
     try {
       await fetch(`${API}/notes/tasks/${task.id}`, {

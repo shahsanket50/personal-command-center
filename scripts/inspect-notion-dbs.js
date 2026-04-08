@@ -95,6 +95,9 @@ async function inspect(db) {
     } else if (prop.type === 'multi_select') {
       const opts = prop.multi_select.options.map((o) => o.name).join(', ');
       detail = opts ? `  →  ${opts}` : '';
+    } else if (prop.type === 'status') {
+      const opts = prop.status.options.map((o) => o.name).join(', ');
+      detail = opts ? `  →  ${opts}` : '';
     } else if (prop.type === 'relation') {
       detail = `  →  related to ${prop.relation.database_id.slice(0, 8)}…`;
     } else if (prop.type === 'formula') {
