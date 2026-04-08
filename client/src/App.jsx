@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import {
   Settings,
@@ -10,6 +10,8 @@ import {
   Mail,
   Users,
   Target,
+  X,
+  AlertTriangle,
 } from 'lucide-react';
 import { getThemeForModule, themes } from './themes/index.js';
 import { clsx } from 'clsx';
@@ -53,6 +55,17 @@ export default function App() {
       ? themes.dark
       : getThemeForModule(activeModule);
 
+  // Overdue task banner — checked once on mount, dismissed in-memory
+  const [overdueTasks, setOverdueTasks] = useState([]);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/notes/tasks/overdue')
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data) && data.length > 0) setOverdueTasks(data); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className={clsx('flex h-screen w-screen overflow-hidden', theme.app)}>
       {/* Sidebar */}
@@ -90,7 +103,22 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className={clsx('flex-1 overflow-y-auto', theme.content)}>
+      <main className={clsx('flex-1 overflow-y-auto flex flex-col', theme.content)}>
+        {/* Overdue task banner */}
+        {overdueTasks.length > 0 && !bannerDismissed && (
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-red-50 border-b border-red-200 text-red-700 text-sm flex-shrink-0">
+            <AlertTriangle size={14} className="flex-shrink-0" />
+            <span className="flex-1">
+              <strong>{overdueTasks.length} overdue {overdueTasks.length === 1 ? 'task' : 'tasks'}:</strong>{' '}
+              {overdueTasks.slice(0, 3).map((t) => t.title).join(', ')}
+              {overdueTasks.length > 3 && ` +${overdueTasks.length - 3} more`}
+            </span>
+            <button onClick={() => setBannerDismissed(true)} className="text-red-400 hover:text-red-600">
+              <X size={14} />
+            </button>
+          </div>
+        )}
+        <div className="flex-1 overflow-y-auto">
         <Routes>
           <Route path="/" element={<SettingsModule theme={theme} />} />
           <Route path="/settings" element={<SettingsModule theme={theme} />} />
@@ -103,6 +131,7 @@ export default function App() {
           <Route path="/people" element={<People theme={theme} />} />
           <Route path="/life-goals" element={<LifeGoals theme={theme} />} />
         </Routes>
+        </div>
       </main>
     </div>
   );

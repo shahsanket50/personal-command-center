@@ -1,0 +1,41 @@
+import express from 'express';
+import { getMergedEvents, isGoogleConnected } from '../services/calendar.js';
+import { isMSConnected } from '../services/outlook.js';
+import { getTravelEntries } from '../services/notion.js';
+
+const router = express.Router();
+
+// GET /api/calendar/status — which accounts are connected
+router.get('/status', async (_req, res) => {
+  const [googleConnected, msConnected] = await Promise.all([
+    isGoogleConnected().catch(() => false),
+    isMSConnected().catch(() => false),
+  ]);
+  res.json({ google: googleConnected, microsoft: msConnected });
+});
+
+// GET /api/calendar/events?date=YYYY-MM-DD
+router.get('/events', async (req, res) => {
+  const dateStr = req.query.date || new Date().toISOString().split('T')[0];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return res.status(400).json({ error: 'date must be YYYY-MM-DD' });
+  }
+  try {
+    const events = await getMergedEvents(dateStr);
+    res.json(events);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/calendar/travel — Notion travel entries for OOO flags
+router.get('/travel', async (_req, res) => {
+  try {
+    const entries = await getTravelEntries();
+    res.json(entries);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+export default router;

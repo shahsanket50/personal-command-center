@@ -7,6 +7,9 @@ import cors from 'cors';
 import settingsRoutes from './routes/settings.js';
 import notionRoutes from './routes/notion.js';
 import claudeRoutes from './routes/claude.js';
+import notesRoutes from './routes/notes.js';
+import calendarRoutes from './routes/calendar.js';
+import authRoutes from './routes/auth.js';
 
 // Load .env using an explicit path relative to this file, not process.cwd().
 // This means `cd server && npm run dev` and `node server/index.js` both work.
@@ -26,6 +29,9 @@ app.use(express.json());
 app.use('/api/settings', settingsRoutes);
 app.use('/api/notion', notionRoutes);
 app.use('/api/claude', claudeRoutes);
+app.use('/api/notes', notesRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

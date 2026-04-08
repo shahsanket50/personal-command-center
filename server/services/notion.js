@@ -68,6 +68,198 @@ export async function saveConversation(title, messages) {
   });
 }
 
+// ─── Daily Notes ─────────────────────────────────────────────────────────────
+
+/**
+ * Fetch or create today's daily note page in NOTION_DB_DAILY_BRIEFINGS.
+ * Identified by title format "Daily Note · YYYY-MM-DD".
+ * @param {string} dateStr - 'YYYY-MM-DD'
+ * @returns {{ id: string, content: string }}
+ */
+export async function getDailyNote(dateStr) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) throw new Error('NOTION_DB_DAILY_BRIEFINGS is not set');
+
+  const pageTitle = `Daily Note · ${dateStr}`;
+
+  const { results } = await notion.databases.query({
+    database_id: dbId,
+    filter: { property: 'title', title: { equals: pageTitle } },
+    page_size: 1,
+  });
+
+  if (results.length > 0) {
+    const page = results[0];
+    const blocks = await notion.blocks.children.list({ block_id: page.id });
+    const content = blocks.results
+      .filter((b) => b.type === 'paragraph')
+      .map((b) => b.paragraph.rich_text.map((t) => t.plain_text).join(''))
+      .join('\n\n');
+    return { id: page.id, content };
+  }
+
+  const page = await notion.pages.create({
+    parent: { database_id: dbId },
+    properties: {
+      title: { title: [{ type: 'text', text: { content: pageTitle } }] },
+    },
+  });
+
+  return { id: page.id, content: '' };
+}
+
+/**
+ * Overwrite a daily note page's paragraph blocks with new content.
+ * @param {string} pageId
+ * @param {string} content
+ */
+export async function saveDailyNote(pageId, content) {
+  const notion = getNotionClient();
+
+  const { results: existing } = await notion.blocks.children.list({ block_id: pageId });
+  for (const block of existing) {
+    if (block.type === 'paragraph') {
+      await notion.blocks.delete({ block_id: block.id });
+    }
+  }
+
+  if (!content.trim()) return;
+
+  const paras = content.split(/\n\n+/).filter((p) => p.trim());
+  const children = paras.map((p) => ({
+    object: 'block',
+    type: 'paragraph',
+    paragraph: {
+      rich_text: [{ type: 'text', text: { content: p.trim().slice(0, 2000) } }],
+    },
+  }));
+
+  await notion.blocks.children.append({
+    block_id: pageId,
+    children: children.slice(0, 100),
+  });
+}
+
+// ─── Tasks ────────────────────────────────────────────────────────────────────
+
+function mapTask(page) {
+  const props = page.properties;
+  // Support both "Name" and bare title property
+  const titleProp = props.Name ?? props.title ?? Object.values(props).find((p) => p.type === 'title');
+  return {
+    id: page.id,
+    title: titleProp?.title?.[0]?.plain_text ?? '',
+    status: props.Status?.select?.name ?? 'Todo',
+    dueDate: props['Due Date']?.date?.start ?? null,
+  };
+}
+
+export async function getTasks() {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_TASKS;
+  if (!dbId) throw new Error('NOTION_DB_TASKS is not set');
+
+  const { results } = await notion.databases.query({
+    database_id: dbId,
+    sorts: [{ property: 'Due Date', direction: 'ascending' }],
+  });
+
+  return results.map(mapTask);
+}
+
+export async function getOverdueTasks() {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_TASKS;
+  if (!dbId) return [];
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const { results } = await notion.databases.query({
+    database_id: dbId,
+    filter: {
+      and: [
+        { property: 'Due Date', date: { before: today } },
+        { property: 'Status', select: { does_not_equal: 'Done' } },
+      ],
+    },
+  });
+
+  return results.map(mapTask);
+}
+
+export async function createTask(title, dueDate) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_TASKS;
+  if (!dbId) throw new Error('NOTION_DB_TASKS is not set');
+
+  const properties = {
+    Name: { title: [{ type: 'text', text: { content: title } }] },
+    Status: { select: { name: 'Todo' } },
+  };
+
+  if (dueDate) {
+    properties['Due Date'] = { date: { start: dueDate } };
+  }
+
+  const page = await notion.pages.create({
+    parent: { database_id: dbId },
+    properties,
+  });
+
+  return mapTask(page);
+}
+
+export async function updateTask(pageId, updates) {
+  const notion = getNotionClient();
+
+  const properties = {};
+  if (updates.status !== undefined) {
+    properties['Status'] = { select: { name: updates.status } };
+  }
+  if (updates.title !== undefined) {
+    properties['Name'] = { title: [{ type: 'text', text: { content: updates.title } }] };
+  }
+  if ('dueDate' in updates) {
+    properties['Due Date'] = updates.dueDate ? { date: { start: updates.dueDate } } : { date: null };
+  }
+
+  const page = await notion.pages.update({ page_id: pageId, properties });
+  return mapTask(page);
+}
+
+// ─── Travel Bookings (for Calendar OOO flags) ─────────────────────────────────
+
+/**
+ * Fetch travel entries from Notion for Calendar OOO flagging.
+ * Returns [] gracefully if DB is not configured or accessible.
+ */
+export async function getTravelEntries() {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_TRAVEL_BOOKINGS;
+  if (!dbId) return [];
+
+  try {
+    const { results } = await notion.databases.query({
+      database_id: dbId,
+      sorts: [{ property: 'Start Date', direction: 'ascending' }],
+    });
+
+    return results.map((page) => {
+      const props = page.properties;
+      const titleProp = props.Name ?? props.title ?? Object.values(props).find((p) => p.type === 'title');
+      return {
+        id: page.id,
+        title: titleProp?.title?.[0]?.plain_text ?? '',
+        startDate: props['Start Date']?.date?.start ?? null,
+        endDate: props['End Date']?.date?.start ?? null,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
 // ─── Notion block builders ────────────────────────────────────────────────────
 
 const NOTION_LANG_MAP = {
