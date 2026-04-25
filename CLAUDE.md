@@ -90,7 +90,8 @@ server/services/ — notion.js, claude.js, outlook.js, gmail.js, calendar.js, sl
 Phase 1 complete — Claude CLI module built (streaming, history, syntax highlighting, Notion save).
 Phase 2 complete — Notes & Tasks module (daily notes, task CRUD, overdue banner on app open).
 Phase 3 complete — Calendar module (Google Calendar + Microsoft Graph OAuth, merged day view, OOO flags).
-Next: Phase 4 — Morning Brief (Claude-generated daily summary, written to Notion).
+Phase 4 complete — Morning Brief (Claude-generated daily summary, SSE streaming, written to Notion, cards theme).
+Next: Phase 5 — Slack digest + Email triage (dual account: MS Graph + Gmail).
 
 ## Phase 2 & 3 notes
 - Daily notes stored in NOTION_DB_DAILY_BRIEFINGS, distinguished by title prefix "Daily Note · YYYY-MM-DD"
@@ -100,3 +101,14 @@ Next: Phase 4 — Morning Brief (Claude-generated daily summary, written to Noti
 - Microsoft Calendar tokens: ms-token.json (gitignored), refresh via MSAL token cache serialization
 - OAuth redirect URIs to register: http://localhost:3001/api/auth/google/callback and http://localhost:3001/api/auth/microsoft/callback
 - Server dependencies added: googleapis, @azure/msal-node
+
+## Phase 4 notes
+- Brief route: GET /api/brief/today (cached), POST /api/brief/generate (SSE stream)
+- Brief generation gathers: overdue tasks, due-today tasks, today's merged calendar events, travel entries
+- Travel filtered to entries overlapping today or tomorrow — framed as personal flags only
+- Full brief saved to NOTION_DB_DAILY_BRIEFINGS as Notion heading_2 / bulleted_list_item / paragraph blocks
+- Title format: "Morning Brief · YYYY-MM-DD"
+- Client auto-fetches cached brief on mount; auto-generates if none found for today
+- Sections parsed client-side from ## headings; each section rendered as a card (cards theme)
+- New Notion helpers: getDueTodayTasks, saveBriefing, getLatestBriefingForDate, briefMarkdownToBlocks, reconstructBriefMarkdown
+- New Claude helper: generateMorningBrief (streaming generator, same pattern as streamChat)

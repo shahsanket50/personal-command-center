@@ -228,6 +228,138 @@ export async function updateTask(pageId, updates) {
   return mapTask(page);
 }
 
+// ─── Morning Brief ────────────────────────────────────────────────────────────
+
+/**
+ * Fetch tasks due exactly on dateStr (not done).
+ * @param {string} dateStr - 'YYYY-MM-DD'
+ */
+export async function getDueTodayTasks(dateStr) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_TASKS;
+  if (!dbId) return [];
+
+  try {
+    const { results } = await notion.databases.query({
+      database_id: dbId,
+      filter: {
+        and: [
+          { property: 'Due Date', date: { equals: dateStr } },
+          { property: 'Status', select: { does_not_equal: 'Done' } },
+        ],
+      },
+    });
+    return results.map(mapTask);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Save a morning brief (markdown string) to the Daily Briefings DB as Notion blocks.
+ * Title format: "Morning Brief · YYYY-MM-DD"
+ */
+export async function saveBriefing(dateStr, content) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) throw new Error('NOTION_DB_DAILY_BRIEFINGS is not set');
+
+  const blocks = briefMarkdownToBlocks(content);
+
+  await notion.pages.create({
+    parent: { database_id: dbId },
+    properties: {
+      title: {
+        title: [{ type: 'text', text: { content: `Morning Brief · ${dateStr}` } }],
+      },
+    },
+    children: blocks.slice(0, 100),
+  });
+}
+
+/**
+ * Fetch the most recent morning brief for a given date from Notion.
+ * Returns null if none exists.
+ * @param {string} dateStr - 'YYYY-MM-DD'
+ */
+export async function getLatestBriefingForDate(dateStr) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) return null;
+
+  try {
+    const { results } = await notion.databases.query({
+      database_id: dbId,
+      filter: {
+        property: 'title',
+        title: { starts_with: `Morning Brief · ${dateStr}` },
+      },
+      sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+      page_size: 1,
+    });
+
+    if (!results.length) return null;
+
+    const page = results[0];
+    const { results: blocks } = await notion.blocks.children.list({ block_id: page.id });
+    const content = reconstructBriefMarkdown(blocks);
+
+    return { id: page.id, content, createdAt: page.created_time };
+  } catch {
+    return null;
+  }
+}
+
+function briefMarkdownToBlocks(content) {
+  const blocks = [];
+  for (const line of content.split('\n')) {
+    if (!line.trim()) continue;
+    if (line.startsWith('## ')) {
+      blocks.push({
+        object: 'block',
+        type: 'heading_2',
+        heading_2: {
+          rich_text: [{ type: 'text', text: { content: line.slice(3).trim() } }],
+        },
+      });
+    } else if (line.startsWith('- ')) {
+      blocks.push({
+        object: 'block',
+        type: 'bulleted_list_item',
+        bulleted_list_item: {
+          rich_text: [{ type: 'text', text: { content: line.slice(2).trim().slice(0, 2000) } }],
+        },
+      });
+    } else {
+      blocks.push({
+        object: 'block',
+        type: 'paragraph',
+        paragraph: {
+          rich_text: [{ type: 'text', text: { content: line.trim().slice(0, 2000) } }],
+        },
+      });
+    }
+  }
+  return blocks;
+}
+
+function reconstructBriefMarkdown(blocks) {
+  const lines = [];
+  for (const block of blocks) {
+    const text = (t) => block[t]?.rich_text?.map((r) => r.plain_text).join('') ?? '';
+    if (block.type === 'heading_2') {
+      if (lines.length > 0) lines.push('');
+      lines.push('## ' + text('heading_2'));
+    } else if (block.type === 'bulleted_list_item') {
+      lines.push('- ' + text('bulleted_list_item'));
+    } else if (block.type === 'paragraph') {
+      const t = text('paragraph');
+      if (t) lines.push(t);
+    }
+  }
+  return lines.join('\n');
+}
+
 // ─── Travel Bookings (for Calendar OOO flags) ─────────────────────────────────
 
 /**
