@@ -23,6 +23,7 @@ const API = 'http://localhost:3001/api';
 
 const PATH_TO_PIVOT = { '/': 'today', '/triage': 'triage', '/people': 'people' };
 const PIVOT_PATHS   = { today: '/', triage: '/triage', people: '/people' };
+const CURSOR_KEY    = { triage: 'triage', tasks: 'tasks', people: 'people' };
 
 export default function App() {
   const location = useLocation();
@@ -98,8 +99,6 @@ export default function App() {
     return { status: `unknown command: ${cmd}` };
   }, [switchPivot, navigate]);
 
-  const CURSOR_KEY = { triage: 'triage', tasks: 'tasks', people: 'people' };
-
   const handlers = useMemo(() => ({
     any: (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -123,11 +122,13 @@ export default function App() {
         return;
       }
 
-      const cKey = CURSOR_KEY[panelFocus];
-      const listLen = panelFocus === 'tasks' ? taskLen : panelFocus === 'triage' ? triageLen : panelFocus === 'people' ? peopleLen : 0;
-      if (cKey && listLen > 0) {
-        if (e.key === 'j') { e.preventDefault(); setCursors((c) => ({ ...c, [cKey]: Math.min(c[cKey] + 1, listLen - 1) })); }
-        if (e.key === 'k') { e.preventDefault(); setCursors((c) => ({ ...c, [cKey]: Math.max(c[cKey] - 1, 0) })); }
+      if (!isModulePage) {
+        const cKey = CURSOR_KEY[panelFocus];
+        const listLen = panelFocus === 'tasks' ? taskLen : panelFocus === 'triage' ? triageLen : panelFocus === 'people' ? peopleLen : 0;
+        if (cKey && listLen > 0) {
+          if (e.key === 'j') { e.preventDefault(); setCursors((c) => ({ ...c, [cKey]: Math.min(c[cKey] + 1, listLen - 1) })); }
+          if (e.key === 'k') { e.preventDefault(); setCursors((c) => ({ ...c, [cKey]: Math.max(c[cKey] - 1, 0) })); }
+        }
       }
     },
   }), [cmdOpen, helpOpen, gPressed, panelFocus, panels, taskLen, triageLen, peopleLen, switchPivot, isModulePage]);
