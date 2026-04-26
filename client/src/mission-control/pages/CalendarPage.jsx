@@ -42,7 +42,7 @@ export function CalendarPage({ accent }) {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const HOURS = Array.from({ length: 16 }, (_, i) => 6 + i);
+  const HOURS = Array.from({ length: 17 }, (_, i) => 6 + i);
   const frac = nowFrac(date);
   const connectWarning = status.google === false || status.microsoft === false;
 
@@ -65,15 +65,14 @@ export function CalendarPage({ accent }) {
           </div>
         )}
         <div style={{ position: 'relative', overflowY: 'auto', flex: 1, padding: '4px 12px' }}>
-          {frac >= 0 && frac <= 16 && (
-            <div style={{ position: 'absolute', left: 54, right: 12, top: `${(frac / 16) * 100}%`, height: 1, background: '#10b981', boxShadow: '0 0 6px #10b981', zIndex: 2, pointerEvents: 'none' }}>
+          {frac >= 0 && frac <= HOURS.length && (
+            <div style={{ position: 'absolute', left: 54, right: 12, top: `${(frac / HOURS.length) * 100}%`, height: 1, background: '#10b981', boxShadow: '0 0 6px #10b981', zIndex: 2, pointerEvents: 'none' }}>
               <div style={{ position: 'absolute', left: -4, top: -3, width: 7, height: 7, borderRadius: 4, background: '#10b981' }} />
             </div>
           )}
           {HOURS.map((h, i) => {
             const hourEvents = events.filter(ev => {
-              const s = ev.start?.dateTime ?? ev.start?.date;
-              return s && new Date(s).getHours() === h;
+              return ev.start && new Date(ev.start).getHours() === h;
             });
             return (
               <div key={h} style={{ display: 'flex', gap: 10, minHeight: 52, borderTop: i === 0 ? 'none' : `1px solid ${T.bg4}`, paddingTop: 4, position: 'relative', alignItems: 'flex-start' }}>
@@ -81,12 +80,12 @@ export function CalendarPage({ accent }) {
                 <div style={{ flex: 1 }}>
                   {hourEvents.map((ev, j) => {
                     const now = new Date();
-                    const start = new Date(ev.start?.dateTime ?? ev.start?.date);
-                    const end   = new Date(ev.end?.dateTime ?? ev.end?.date);
+                    const start = new Date(ev.start);
+                    const end   = new Date(ev.end);
                     const isPast = end < now;
                     const isNow  = start <= now && now < end;
                     const tagColor = ev.source === 'personal' ? '#10b981' : isNow ? accent : T.info;
-                    const startLabel = ev.start?.dateTime ? new Date(ev.start.dateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+                    const startLabel = ev.start ? new Date(ev.start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
                     const isExpanded = expanded === (ev.id ?? j);
                     return (
                       <div
@@ -95,7 +94,7 @@ export function CalendarPage({ accent }) {
                         style={{ padding: '3px 8px', background: isNow ? T.bg4 : T.bg3, borderLeft: `2px solid ${tagColor}`, fontSize: 11, color: isPast ? T.textGhost : isNow ? T.textHi : T.text, borderRadius: 2, marginBottom: 3, cursor: 'pointer', textDecoration: isPast ? 'line-through' : 'none' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ color: T.textFaint, fontSize: 10, minWidth: 36 }}>{startLabel}</span>
+                          <span style={{ color: T.textGhost, fontSize: 10, minWidth: 36 }}>{startLabel}</span>
                           {isNow && <span style={{ color: '#10b981' }}>●</span>}
                           <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(ev.summary ?? '(no title)').toLowerCase()}</span>
                           {ev.attendeeCount > 0 && <span style={{ color: T.textGhost, fontSize: 10 }}>{ev.attendeeCount}p</span>}
@@ -103,9 +102,9 @@ export function CalendarPage({ accent }) {
                         </div>
                         {isExpanded && (
                           <div style={{ marginTop: 4, color: T.textDim, fontSize: 10.5, lineHeight: 1.5 }}>
-                            {ev.location && <div>📍 {ev.location}</div>}
-                            {ev.attendeeCount > 0 && <div>👥 {ev.attendeeCount} attendees</div>}
-                            {start && end && <div>🕐 {startLabel} – {end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</div>}
+                            {ev.location && <div>loc: {ev.location}</div>}
+                            {ev.attendeeCount > 0 && <div>{ev.attendeeCount} attendees</div>}
+                            {start && end && <div>{startLabel} – {end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</div>}
                           </div>
                         )}
                       </div>

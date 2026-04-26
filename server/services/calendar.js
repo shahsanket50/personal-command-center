@@ -98,6 +98,7 @@ export async function getGoogleEvents(dateStr) {
     allDay: !e.start.dateTime,
     source: 'personal',
     location: e.location ?? null,
+    attendeeCount: (e.attendees || []).length,
   }));
 }
 
@@ -141,6 +142,7 @@ export async function getMSEvents(dateStr) {
     allDay: e.isAllDay ?? false,
     source: 'office',
     location: e.location?.displayName ?? null,
+    attendeeCount: (e.attendees || []).length,
   }));
 }
 
