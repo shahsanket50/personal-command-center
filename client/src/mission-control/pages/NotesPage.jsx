@@ -168,7 +168,7 @@ export function NotesPage({ accent }) {
         <textarea
           value={noteText}
           onChange={handleNoteChange}
-          onBlur={() => { clearTimeout(saveTimer.current); saveNote(noteText); }}
+          onBlur={() => { clearTimeout(saveTimer.current); setSaveStatus('saving…'); saveNote(noteText); }}
           placeholder="# today's note…"
           style={{
             width: '100%', height: '100%', background: T.bg1, color: T.text,
