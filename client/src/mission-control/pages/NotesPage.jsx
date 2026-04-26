@@ -163,7 +163,7 @@ export function NotesPage({ accent }) {
       <Panel
         title={`daily_note · ${LABEL}`}
         accent={accent}
-        right={saveStatus ? <span style={{ fontSize: 9.5, color: saveStatus === 'error' ? T.danger : T.textDim }}>{saveStatus}</span> : null}
+        right={saveStatus ? <span style={{ fontSize: 9.5, color: T.textDim }}>{saveStatus}</span> : null}
       >
         <textarea
           value={noteText}
@@ -182,11 +182,7 @@ export function NotesPage({ accent }) {
       <Panel
         title={`tasks [${activeCount} active]`}
         accent={accent}
-        right={
-          <button onClick={() => setShowDone(s => !s)} style={{ background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 9.5, fontFamily: 'inherit' }}>
-            {showDone ? 'hide done' : 'show done'}
-          </button>
-        }
+        right={<span style={{ color: T.textDim, fontSize: 9.5 }}>view all →</span>}
       >
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
           <div style={{ display: 'flex', gap: 6, padding: '8px 8px 4px', flexShrink: 0 }}>
@@ -213,7 +209,18 @@ export function NotesPage({ accent }) {
             <TaskGroup label="today"    tasks={groups.today}    labelColor={accent}      onToggle={handleToggle} onDelete={handleDelete} />
             <TaskGroup label="upcoming" tasks={groups.upcoming} labelColor={T.textDim}   onToggle={handleToggle} onDelete={handleDelete} />
             <TaskGroup label="no date"  tasks={groups.noDate}   labelColor={T.textFaint} onToggle={handleToggle} onDelete={handleDelete} />
-            {showDone && <TaskGroup label="done" tasks={groups.done} labelColor={T.textGhost} onToggle={handleToggle} onDelete={handleDelete} />}
+            {groups.done.length > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                <div
+                  onClick={() => setShowDone(s => !s)}
+                  style={{ fontSize: 9.5, color: T.textGhost, letterSpacing: '.06em', padding: '2px 8px', marginBottom: 2, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                >
+                  <span>{showDone ? '▾' : '▸'}</span>
+                  <span>done ({groups.done.length})</span>
+                </div>
+                {showDone && groups.done.map(t => <TaskRow key={t.id} task={t} onToggle={handleToggle} onDelete={handleDelete} />)}
+              </div>
+            )}
           </div>
         </div>
       </Panel>
