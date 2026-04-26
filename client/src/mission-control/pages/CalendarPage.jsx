@@ -96,7 +96,7 @@ export function CalendarPage({ accent }) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{ color: T.textGhost, fontSize: 10, minWidth: 36 }}>{startLabel}</span>
                           {isNow && <span style={{ color: '#10b981' }}>●</span>}
-                          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(ev.summary ?? '(no title)').toLowerCase()}</span>
+                          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(ev.title ?? '(no title)').toLowerCase()}</span>
                           {ev.attendeeCount > 0 && <span style={{ color: T.textGhost, fontSize: 10 }}>{ev.attendeeCount}p</span>}
                           <span style={{ color: T.textGhost, fontSize: 9, flexShrink: 0 }}>{ev.source}</span>
                         </div>
