@@ -462,6 +462,54 @@ export async function saveActionItems(items) {
   );
 }
 
+// ─── Email Digest ─────────────────────────────────────────────────────────────
+
+/**
+ * Save an email digest (markdown string) to the Daily Briefings DB as Notion blocks.
+ * Title format: "Email Digest · YYYY-MM-DD"
+ */
+export async function saveEmailDigest(date, markdownContent) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) throw new Error('NOTION_DB_DAILY_BRIEFINGS not set');
+
+  const title = `Email Digest · ${date}`;
+  const blocks = briefMarkdownToBlocks(markdownContent);
+
+  await notion.pages.create({
+    parent: { database_id: dbId },
+    properties: {
+      title: { title: [{ text: { content: title } }] },
+    },
+    children: blocks,
+  });
+}
+
+/**
+ * Fetch the most recent email digest for a given date from Notion.
+ * Returns null if none exists.
+ * @param {string} date - 'YYYY-MM-DD'
+ */
+export async function getLatestEmailDigestForDate(date) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) throw new Error('NOTION_DB_DAILY_BRIEFINGS not set');
+
+  const title = `Email Digest · ${date}`;
+  const response = await notion.databases.query({
+    database_id: dbId,
+    filter: { property: 'title', title: { equals: title } },
+    sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+    page_size: 1,
+  });
+
+  if (!response.results.length) return null;
+
+  const page = response.results[0];
+  const { results: blocks } = await notion.blocks.children.list({ block_id: page.id });
+  return reconstructBriefMarkdown(blocks);
+}
+
 // ─── Notion block builders ────────────────────────────────────────────────────
 
 const NOTION_LANG_MAP = {
