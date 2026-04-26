@@ -115,3 +115,40 @@ export async function getMSAccessToken() {
 
   throw new Error('Microsoft token expired — please reconnect');
 }
+
+/**
+ * Fetch unread emails from the Office Outlook inbox via Microsoft Graph.
+ * @param {{ maxResults?: number }} options
+ * @returns {Promise<Array<{ id: string, subject: string, from: string, date: string, snippet: string, account: string, source: string }>>}
+ */
+export async function fetchUnreadOutlookEmails({ maxResults = 30 } = {}) {
+  const accessToken = await getMSAccessToken();
+
+  const url =
+    `https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages` +
+    `?$filter=isRead%20eq%20false` +
+    `&$select=subject,from,receivedDateTime,bodyPreview` +
+    `&$orderby=receivedDateTime%20desc` +
+    `&$top=${maxResults}`;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Microsoft Graph mail fetch failed (${res.status}): ${text}`);
+  }
+
+  const data = await res.json();
+
+  return (data.value || []).map(msg => ({
+    id: msg.id,
+    subject: msg.subject || '(no subject)',
+    from: msg.from?.emailAddress?.address || 'unknown',
+    date: msg.receivedDateTime || '',
+    snippet: msg.bodyPreview || '',
+    account: 'office',
+    source: 'Outlook',
+  }));
+}
