@@ -93,7 +93,14 @@ Phase 3 complete — Calendar module (Google Calendar + Microsoft Graph OAuth, m
 Phase 4 complete — Morning Brief (Claude-generated daily summary, SSE streaming, written to Notion, cards theme).
 Phase 5 complete — Slack Digest (all joined channels/DMs, Claude triage, channel blacklist, action items → Notion, cards theme).
 Phase 6 complete — Email Triage (Gmail + Outlook unread, Claude dual-account summary, action items → Notion, cards theme).
-Next: Phase 7 — People & 1:1s.
+Mission Control revamp complete — 3-pivot keyboard-first terminal interface replacing the 9-module sidebar:
+  Today pivot: schedule_today (calendar events + now-line), action_queue (ranked tasks), morning_brief (SSE), triage snapshot, people cadence.
+  Triage pivot: unified stream (Slack DMs/mentions, email reply/fyi, cal invites), lane filter chips, focus detail pane, urgent ambient sidebar.
+  People pivot: team roster from Notion PEOPLE DB + person detail with cadence status and claude prep.
+  Command palette (⌘K): /task, /note, /brief, /today, /triage, /people working end-to-end.
+  Keyboard: j/k cursor, Tab pane, g+t/i/p pivot, ? help overlay, ⌘K palette.
+  New routes: GET /api/triage/items (Slack+Email+Cal classify), GET /api/people (Notion People DB).
+Next: Phase 7 — People & 1:1s deep dive (talking points, activity merge, claude prep streaming).
 
 ## Phase 2 & 3 notes
 - Daily notes stored in NOTION_DB_DAILY_BRIEFINGS, distinguished by title prefix "Daily Note · YYYY-MM-DD"
