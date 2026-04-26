@@ -9,7 +9,7 @@ export function useKeyboard(handlers) {
         return;
       }
       handlers.any?.(e);
-      if (handlers[e.key]) handlers[e.key](e);
+      handlers[e.key]?.(e);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
