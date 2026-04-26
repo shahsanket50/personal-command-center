@@ -170,3 +170,49 @@ ${channelSummaries}`;
     }
   }
 }
+
+export async function* generateEmailDigest({ date, gmailEmails, outlookEmails }) {
+  const client = getAnthropicClient();
+
+  function formatEmails(emails) {
+    return emails.map(e =>
+      `- [${e.from}] "${e.subject}" (${e.date})\n  ${e.snippet}`
+    ).join('\n');
+  }
+
+  const prompt = `You are triaging emails for ${date} for an Engineering Manager.
+
+## Office emails (Outlook / Microsoft 365)
+${outlookEmails.length ? formatEmails(outlookEmails) : 'No unread office emails.'}
+
+## Personal emails (Gmail)
+${gmailEmails.length ? formatEmails(gmailEmails) : 'No unread personal emails.'}
+
+For each account section, provide:
+## Office Emails
+**Summary:** Overall summary of unread emails.
+**Action items:** bullet list of "- [ ] action (from: sender)" for emails needing a response or action, or "None".
+
+## Personal Emails
+**Summary:** Overall summary.
+**Action items:** bullet list of "- [ ] action (from: sender)", or "None".
+
+## Email Insights
+- High-priority senders or threads
+- Patterns worth noting
+- Suggested next actions
+
+Keep it concise. Flag anything time-sensitive or from senior stakeholders.`;
+
+  const stream = client.messages.stream({
+    model: 'claude-sonnet-4-5',
+    max_tokens: 1536,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  for await (const event of stream) {
+    if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+      yield event.delta.text;
+    }
+  }
+}
