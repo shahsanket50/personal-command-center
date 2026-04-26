@@ -100,7 +100,11 @@ Mission Control revamp complete — 3-pivot keyboard-first terminal interface re
   Command palette (⌘K): /task, /note, /brief, /today, /triage, /people working end-to-end.
   Keyboard: j/k cursor, Tab pane, g+t/i/p pivot, ? help overlay, ⌘K palette.
   New routes: GET /api/triage/items (Slack+Email+Cal classify), GET /api/people (Notion People DB).
+MC Navigation & Module Pages in progress — three-row top bar, MC-native full-page routes for all modules, task interactivity in panels (spec: docs/superpowers/specs/2026-04-26-mc-full-navigation-design.md).
 Next: Phase 7 — People & 1:1s deep dive (talking points, activity merge, claude prep streaming).
+
+## Backlog (deferred cleanup)
+- Remove `client/src/modules/` entirely once all MC pages (`client/src/mission-control/pages/`) are stable and verified. Old modules are no longer routed but kept as reference during the migration.
 
 ## Phase 2 & 3 notes
 - Daily notes stored in NOTION_DB_DAILY_BRIEFINGS, distinguished by title prefix "Daily Note · YYYY-MM-DD"
