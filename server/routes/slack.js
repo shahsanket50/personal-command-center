@@ -77,7 +77,7 @@ router.post('/digest/generate', async (_req, res) => {
     const actionLines = fullContent
       .split('\n')
       .filter(l => l.trim().startsWith('- [ ]'))
-      .map(l => ({ text: l.replace('- [ ]', '').trim(), source: 'Slack', sourceDetail: '' }));
+      .map(l => ({ text: l.replace(/^-\s\[\s\]\s*/, '').trim(), source: 'Slack', sourceDetail: '' }));
 
     try { await saveSlackDigest(today, fullContent); } catch (e) { console.error('[slack] Notion digest save failed:', e.message); }
     try { if (actionLines.length) await saveActionItems(actionLines); } catch (e) { console.error('[slack] Notion action items save failed:', e.message); }

@@ -159,7 +159,7 @@ Be concise. Flag anything time-sensitive.
 ${channelSummaries}`;
 
   const stream = client.messages.stream({
-    model: 'claude-sonnet-4-5',
+    model: DEFAULT_MODEL,
     max_tokens: 2048,
     messages: [{ role: 'user', content: prompt }],
   });
@@ -205,7 +205,7 @@ For each account section, provide:
 Keep it concise. Flag anything time-sensitive or from senior stakeholders.`;
 
   const stream = client.messages.stream({
-    model: 'claude-sonnet-4-5',
+    model: DEFAULT_MODEL,
     max_tokens: 1536,
     messages: [{ role: 'user', content: prompt }],
   });

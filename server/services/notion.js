@@ -4,9 +4,6 @@ export function getNotionClient() {
   const key = process.env.NOTION_API_KEY;
   if (!key) throw new Error('NOTION_API_KEY is not set');
 
-  // Debug: confirm key is loaded and looks correct (first 12 chars only)
-  console.log(`[notion] using key: ${key.slice(0, 12)}… (len=${key.length})`);
-
   return new Client({ auth: key });
 }
 
@@ -411,7 +408,7 @@ export async function saveSlackDigest(date, markdownContent) {
     properties: {
       title: { title: [{ text: { content: title } }] },
     },
-    children: blocks,
+    children: blocks.slice(0, 100),
   });
 }
 
@@ -481,7 +478,7 @@ export async function saveEmailDigest(date, markdownContent) {
     properties: {
       title: { title: [{ text: { content: title } }] },
     },
-    children: blocks,
+    children: blocks.slice(0, 100),
   });
 }
 
