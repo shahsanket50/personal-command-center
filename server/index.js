@@ -12,6 +12,7 @@ import calendarRoutes from './routes/calendar.js';
 import authRoutes from './routes/auth.js';
 import briefRoutes from './routes/brief.js';
 import slackRoutes from './routes/slack.js';
+import emailRoutes from './routes/email.js';
 
 // Load .env using an explicit path relative to this file, not process.cwd().
 // This means `cd server && npm run dev` and `node server/index.js` both work.
@@ -36,6 +37,7 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/brief', briefRoutes);
 app.use('/api/slack', slackRoutes);
+app.use('/api/email', emailRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
