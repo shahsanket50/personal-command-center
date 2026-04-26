@@ -3,6 +3,7 @@ import { T } from '../theme.js';
 import { Panel } from '../components/Panel.jsx';
 
 const API = 'http://localhost:3001/api';
+// note: dates computed at module load — stale if the app runs past midnight without reload
 const TODAY = new Date().toISOString().split('T')[0];
 const TOMORROW = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })();
 const LABEL = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -54,7 +55,7 @@ function TaskRow({ task, onToggle, onDelete }) {
       </span>
       {dueLabel && <span style={{ fontSize: 10, color: dueColor, flexShrink: 0 }}>{dueLabel}</span>}
       {hovered && (
-        <button onClick={() => onDelete(task)} style={{ background: 'transparent', border: 'none', color: T.textGhost, cursor: 'pointer', fontSize: 13, flexShrink: 0, padding: 0, lineHeight: 1 }}>×</button>
+        <button onClick={() => onDelete(task.id)} style={{ background: 'transparent', border: 'none', color: T.textGhost, cursor: 'pointer', fontSize: 13, flexShrink: 0, padding: 0, lineHeight: 1 }}>×</button>
       )}
     </div>
   );
@@ -81,18 +82,22 @@ export function NotesPage({ accent }) {
   const [showDone, setShowDone] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDate, setNewDate] = useState('');
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     fetch(`${API}/notes/today`).then(r => r.json()).then(data => {
       if (data?.id) { setNoteId(data.id); setNoteText(data.content ?? ''); }
-    }).catch(() => {});
+    }).catch(() => setLoadError('Failed to load today\'s note.'));
     fetchTasks();
   }, []);
+
+  // Cancel any pending debounce save on unmount to avoid state updates on unmounted component
+  useEffect(() => () => clearTimeout(saveTimer.current), []);
 
   function fetchTasks() {
     fetch(`${API}/notes/tasks`).then(r => r.json()).then(data => {
       setTasks(Array.isArray(data) ? data : []);
-    }).catch(() => {});
+    }).catch(() => setLoadError('Failed to load tasks.'));
   }
 
   function handleNoteChange(e) {
@@ -117,32 +122,45 @@ export function NotesPage({ accent }) {
 
   async function handleAddTask() {
     if (!newTitle.trim()) return;
-    await fetch(`${API}/notes/tasks`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: newTitle.trim(), dueDate: newDate || null }),
-    });
-    setNewTitle(''); setNewDate('');
-    fetchTasks();
+    try {
+      await fetch(`${API}/notes/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle.trim(), dueDate: newDate || null }),
+      });
+      setNewTitle(''); setNewDate('');
+      fetchTasks();
+    } catch {
+      // Keep inputs populated so the user doesn't lose their data
+    }
   }
 
   async function handleToggle(task) {
     const newStatus = task.status === 'Done' ? 'Todo' : 'Done';
     setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
-    await fetch(`${API}/notes/tasks/${task.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
-    });
+    try {
+      await fetch(`${API}/notes/tasks/${task.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch {
+      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: task.status } : t));
+    }
   }
 
-  async function handleDelete(task) {
-    setTasks(prev => prev.filter(t => t.id !== task.id));
-    await fetch(`${API}/notes/tasks/${task.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Done' }),
-    });
+  async function handleDelete(taskId) {
+    const snapshot = tasks; // capture before optimistic remove
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    try {
+      await fetch(`${API}/notes/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Done' }),
+      });
+    } catch {
+      setTasks(snapshot);
+    }
   }
 
   const groups = groupTasks(tasks);
@@ -160,6 +178,11 @@ export function NotesPage({ accent }) {
       gap: 1, background: T.border, overflow: 'hidden', minHeight: 0,
       fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
     }}>
+      {loadError && (
+        <div style={{ gridColumn: '1 / -1', padding: '6px 12px', fontSize: 11, color: T.danger, background: T.bg2, borderBottom: `1px solid ${T.border}` }}>
+          {loadError}
+        </div>
+      )}
       <Panel
         title={`daily_note · ${LABEL}`}
         accent={accent}
