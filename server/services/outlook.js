@@ -1,6 +1,6 @@
 // Microsoft Graph service — office Outlook email + Outlook Calendar (Phase 3 & 6)
 // Auth: Azure AD OAuth2 via MSAL (@azure/msal-node)
-// Scope: Calendars.Read, offline_access
+// Scope: Calendars.Read, Mail.Read, offline_access
 // Token stored in ms-token.json (gitignored)
 
 import { ConfidentialClientApplication } from '@azure/msal-node';
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MS_TOKEN_PATH = path.resolve(__dirname, '../../ms-token.json');
 const REDIRECT_URI = 'http://localhost:3001/api/auth/microsoft/callback';
-const SCOPES = ['Calendars.Read', 'offline_access'];
+const SCOPES = ['Calendars.Read', 'Mail.Read', 'offline_access'];
 
 export function getMSGraphConfig() {
   const required = ['MS_CLIENT_ID', 'MS_CLIENT_SECRET', 'MS_TENANT_ID'];
