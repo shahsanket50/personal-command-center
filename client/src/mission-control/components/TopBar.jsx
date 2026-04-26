@@ -1,63 +1,143 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { T, PIVOTS } from '../theme.js';
 
-const SearchIcon = () => (
-  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <circle cx="7" cy="7" r="4.5"/>
-    <path d="m13.5 13.5-3-3"/>
-  </svg>
-);
+const API = 'http://localhost:3001/api';
 
-export function TopBar({ pivot, setPivot, onCmd, accent }) {
+const MODULES = [
+  { label: 'Notes',       path: '/notes' },
+  { label: 'Calendar',    path: '/calendar' },
+  { label: 'Claude',      path: '/claude' },
+  { label: 'Brief',       path: '/brief' },
+  { label: 'Slack',       path: '/slack' },
+  { label: 'Email',       path: '/email' },
+  { label: 'Life & Goals',path: '/goals' },
+];
+
+const PIVOT_PATHS  = { today: '/', triage: '/triage', people: '/people' };
+const PATH_TO_PIVOT = { '/': 'today', '/triage': 'triage', '/people': 'people' };
+
+function useConnectionStatus() {
+  const [status, setStatus] = useState({ microsoft: null, gmail: null });
+  useEffect(() => {
+    Promise.allSettled([
+      fetch(`${API}/calendar/status`).then(r => r.json()),
+      fetch(`${API}/email/status`).then(r => r.json()),
+    ]).then(([calRes, emailRes]) => {
+      const cal   = calRes.status   === 'fulfilled' ? calRes.value   : {};
+      const email = emailRes.status === 'fulfilled' ? emailRes.value : {};
+      setStatus({ microsoft: cal.microsoft ?? false, gmail: email.gmail ?? false });
+    });
+  }, []);
+  return status;
+}
+
+export function TopBar({ onCmd, accent }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const conn = useConnectionStatus();
+
+  const currentPivot = PATH_TO_PIVOT[location.pathname] ?? null;
+
+  function dotColor(v) {
+    if (v === null) return T.textGhost;
+    return v ? accent : T.danger;
+  }
+
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 4, padding: '7px 12px',
-      background: T.bg1, borderBottom: `1px solid ${T.border}`, flexShrink: 0,
-    }}>
+    <div style={{ flexShrink: 0, fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
+      {/* Row 1 — brand + status + cmd */}
       <div style={{
-        fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
-        fontSize: 10.5, fontWeight: 700, letterSpacing: '.14em', color: accent,
-        paddingRight: 12, marginRight: 6, borderRight: `1px solid ${T.border}`,
+        display: 'flex', alignItems: 'center', height: 28, padding: '0 12px', gap: 10,
+        background: T.bg0, borderBottom: `1px solid ${T.border}`,
       }}>
-        ◆ COMMAND_CENTER
+        <span style={{ color: accent, fontSize: 9, letterSpacing: '.12em', fontWeight: 700 }}>
+          MISSION CONTROL
+        </span>
+        <div style={{ flex: 1 }} />
+        <span style={{ color: dotColor(conn.microsoft), fontSize: 8 }}>● ms</span>
+        <span style={{ color: dotColor(conn.gmail),     fontSize: 8 }}>● gmail</span>
+        <button
+          onClick={onCmd}
+          onMouseDown={e => e.preventDefault()}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, padding: '2px 8px',
+            background: T.bg2, border: `1px solid ${T.borderHi}`, borderRadius: 3,
+            color: T.textDim, fontSize: 8, cursor: 'pointer',
+          }}
+        >
+          ⌘K
+        </button>
       </div>
 
-      {PIVOTS.map((p) => {
-        const active = pivot === p.id;
-        return (
-          <button key={p.id} onClick={() => setPivot(p.id)} onMouseDown={(e) => e.preventDefault()} style={{
-            display: 'flex', alignItems: 'center', gap: 7, padding: '5px 10px',
-            background: active ? T.bg4 : 'transparent',
-            color: active ? accent : T.textDim,
-            border: 'none', borderRadius: 5, cursor: 'pointer',
-            fontSize: 12.5, fontWeight: 500, fontFamily: 'inherit', outline: 'none',
-          }}>
-            {p.label}
-            <span style={{
-              fontSize: 9.5, color: T.textGhost,
-              fontFamily: 'ui-monospace, Menlo, monospace', marginLeft: 4, letterSpacing: '.05em',
-            }}>{p.key}</span>
-          </button>
-        );
-      })}
-
-      <div style={{ flex: 1 }} />
-
-      <button onClick={onCmd} style={{
-        display: 'flex', alignItems: 'center', gap: 8, padding: '5px 8px 5px 11px',
-        background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 5,
-        color: T.textDim, fontSize: 11.5, fontFamily: 'inherit', cursor: 'pointer',
-        minWidth: 240, justifyContent: 'space-between',
+      {/* Row 2 — pivot tabs */}
+      <div style={{
+        display: 'flex', alignItems: 'center', height: 30,
+        background: T.bg1, borderBottom: `1px solid ${T.border}`,
       }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <SearchIcon /> /task, /note, /ask, /brief…
-        </span>
-        <kbd style={{
-          fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 3,
-          background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim,
-          fontFamily: 'ui-monospace, Menlo, monospace',
-        }}>⌘K</kbd>
-      </button>
+        {PIVOTS.map(p => {
+          const active = currentPivot === p.id;
+          return (
+            <button
+              key={p.id}
+              onClick={() => navigate(PIVOT_PATHS[p.id])}
+              onMouseDown={e => e.preventDefault()}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '0 14px', height: '100%', border: 'none', cursor: 'pointer',
+                background: 'transparent',
+                color: active ? accent : T.textDim,
+                fontSize: 9.5,
+                borderBottom: active ? `2px solid ${accent}` : '2px solid transparent',
+              }}
+            >
+              {p.label}
+              <span style={{ color: T.textGhost, fontSize: 8 }}>{p.key}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Row 3 — module links + Settings */}
+      <div style={{
+        display: 'flex', alignItems: 'center', height: 26,
+        background: T.bg2, borderBottom: `1px solid ${T.border}`,
+      }}>
+        {MODULES.map(m => {
+          const active = location.pathname === m.path;
+          return (
+            <button
+              key={m.path}
+              onClick={() => navigate(m.path)}
+              onMouseDown={e => e.preventDefault()}
+              style={{
+                padding: '0 10px', height: '100%', border: 'none', cursor: 'pointer',
+                background: 'transparent',
+                color: active ? accent : T.textDim,
+                fontSize: 8,
+                borderBottom: active ? `2px solid ${accent}` : '2px solid transparent',
+              }}
+            >
+              {m.label}
+            </button>
+          );
+        })}
+        <div style={{ flex: 1 }} />
+        <button
+          onClick={() => navigate('/settings')}
+          onMouseDown={e => e.preventDefault()}
+          style={{
+            padding: '0 10px', height: '100%', border: 'none', cursor: 'pointer',
+            background: 'transparent',
+            color: location.pathname === '/settings' ? accent : T.textFaint,
+            fontSize: 8,
+            borderLeft: `1px solid ${T.border}`,
+            borderBottom: location.pathname === '/settings' ? `2px solid ${accent}` : '2px solid transparent',
+          }}
+        >
+          Settings ⟶
+        </button>
+      </div>
     </div>
   );
 }
