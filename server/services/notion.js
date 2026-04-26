@@ -519,6 +519,53 @@ function mapLang(lang) {
   return NOTION_LANG_MAP[lang] ?? lang ?? 'plain text';
 }
 
+// ─── People ───────────────────────────────────────────────────────────────────
+
+export async function getPeople() {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_PEOPLE;
+  if (!dbId) throw new Error('NOTION_DB_PEOPLE not set');
+
+  const response = await notion.databases.query({
+    database_id: dbId,
+    sorts: [{ property: 'Name', direction: 'ascending' }],
+    page_size: 50,
+  });
+
+  return response.results.map((page) => {
+    const props = page.properties;
+    const name = (props.Name?.title ?? []).map(b => b.plain_text).join('');
+    // Role is rich_text in this DB
+    const role = (props.Role?.rich_text ?? []).map(b => b.plain_text).join('');
+    return {
+      id: page.id,
+      name,
+      role,
+      initials: name.split(' ').map(w => w[0]).filter(Boolean).join('').slice(0, 2).toUpperCase(),
+      last1on1: null, // No date property in People DB
+      notionUrl: page.url,
+      ooo: false,
+    };
+  });
+}
+
+export async function getPersonById(pageId) {
+  const notion = getNotionClient();
+  const page = await notion.pages.retrieve({ page_id: pageId });
+  const props = page.properties;
+  const name = (props.Name?.title ?? []).map(b => b.plain_text).join('');
+  const role = (props.Role?.rich_text ?? []).map(b => b.plain_text).join('');
+  return {
+    id: page.id,
+    name,
+    role,
+    initials: name.split(' ').map(w => w[0]).filter(Boolean).join('').slice(0, 2).toUpperCase(),
+    last1on1: null, // No date property in People DB
+    notionUrl: page.url,
+    ooo: false,
+  };
+}
+
 function parseCodeFences(text) {
   const parts = [];
   const regex = /```(\w*)\n?([\s\S]*?)```/g;

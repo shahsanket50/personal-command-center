@@ -14,6 +14,7 @@ import briefRoutes from './routes/brief.js';
 import slackRoutes from './routes/slack.js';
 import emailRoutes from './routes/email.js';
 import triageRoutes from './routes/triage.js';
+import peopleRoutes from './routes/people.js';
 
 // Load .env using an explicit path relative to this file, not process.cwd().
 // This means `cd server && npm run dev` and `node server/index.js` both work.
@@ -40,6 +41,7 @@ app.use('/api/brief', briefRoutes);
 app.use('/api/slack', slackRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/triage', triageRoutes);
+app.use('/api/people', peopleRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
