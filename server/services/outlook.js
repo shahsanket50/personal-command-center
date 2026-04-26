@@ -101,7 +101,7 @@ export async function getMSAccessToken() {
     const accounts = await app.getTokenCache().getAllAccounts();
     if (accounts.length > 0) {
       const result = await app.acquireTokenSilent({
-        scopes: ['Calendars.Read'],
+        scopes: SCOPES,
         account: accounts[0],
       });
       const msalCache = app.getTokenCache().serialize();
