@@ -392,6 +392,76 @@ export async function getTravelEntries() {
   }
 }
 
+// ─── Slack Digest ─────────────────────────────────────────────────────────────
+
+/**
+ * Save a Slack digest (markdown string) to the Daily Briefings DB as Notion blocks.
+ * Title format: "Slack Digest · YYYY-MM-DD"
+ */
+export async function saveSlackDigest(date, markdownContent) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) throw new Error('NOTION_DB_DAILY_BRIEFINGS not set');
+
+  const title = `Slack Digest · ${date}`;
+  const blocks = briefMarkdownToBlocks(markdownContent);
+
+  await notion.pages.create({
+    parent: { database_id: dbId },
+    properties: {
+      title: { title: [{ text: { content: title } }] },
+    },
+    children: blocks,
+  });
+}
+
+/**
+ * Fetch the most recent Slack digest for a given date from Notion.
+ * Returns null if none exists.
+ * @param {string} date - 'YYYY-MM-DD'
+ */
+export async function getLatestSlackDigestForDate(date) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) throw new Error('NOTION_DB_DAILY_BRIEFINGS not set');
+
+  const title = `Slack Digest · ${date}`;
+  const response = await notion.databases.query({
+    database_id: dbId,
+    filter: { property: 'title', title: { equals: title } },
+    sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+    page_size: 1,
+  });
+
+  if (!response.results.length) return null;
+
+  const page = response.results[0];
+  const { results: blocks } = await notion.blocks.children.list({ block_id: page.id });
+  return reconstructBriefMarkdown(blocks);
+}
+
+/**
+ * Save action items to the Action Items DB.
+ * Action Items DB schema: only has Name (title) — no Source/Status fields.
+ * @param {Array<{ text: string, source: string, sourceDetail: string }>} items
+ */
+export async function saveActionItems(items) {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_ACTION_ITEMS;
+  if (!dbId) throw new Error('NOTION_DB_ACTION_ITEMS not set');
+
+  await Promise.all(
+    items.map(item =>
+      notion.pages.create({
+        parent: { database_id: dbId },
+        properties: {
+          Name: { title: [{ text: { content: item.text } }] },
+        },
+      })
+    )
+  );
+}
+
 // ─── Notion block builders ────────────────────────────────────────────────────
 
 const NOTION_LANG_MAP = {
