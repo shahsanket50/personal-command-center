@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 import { Panel } from '../components/Panel.jsx';
 
 const API = 'http://localhost:3001/api';
@@ -29,6 +29,7 @@ function groupTasks(tasks) {
 }
 
 function TaskRow({ task, onToggle, onDelete }) {
+  const T = useTheme();
   const [hovered, setHovered] = useState(false);
   const dueLabel = !task.dueDate ? '' : task.dueDate < TODAY ? 'overdue' : task.dueDate === TODAY ? 'today' : task.dueDate === TOMORROW ? 'tmrw' : task.dueDate.slice(5);
   const dueColor = dueLabel === 'overdue' ? T.danger : dueLabel === 'today' ? T.warn : T.textFaint;
@@ -62,6 +63,7 @@ function TaskRow({ task, onToggle, onDelete }) {
 }
 
 function TaskGroup({ label, tasks, labelColor, onToggle, onDelete }) {
+  const T = useTheme();
   if (tasks.length === 0) return null;
   return (
     <div style={{ marginBottom: 8 }}>
@@ -73,7 +75,8 @@ function TaskGroup({ label, tasks, labelColor, onToggle, onDelete }) {
   );
 }
 
-export function NotesPage({ accent }) {
+export function NotesPage() {
+  const T = useTheme();
   const [noteId, setNoteId] = useState(null);
   const [noteText, setNoteText] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
@@ -185,7 +188,6 @@ export function NotesPage({ accent }) {
       )}
       <Panel
         title={`daily_note · ${LABEL}`}
-        accent={accent}
         right={saveStatus ? <span style={{ fontSize: 9.5, color: T.textDim }}>{saveStatus}</span> : null}
       >
         <textarea
@@ -204,7 +206,6 @@ export function NotesPage({ accent }) {
 
       <Panel
         title={`tasks [${activeCount} active]`}
-        accent={accent}
         right={<span style={{ color: T.textDim, fontSize: 9.5 }}>view all →</span>}
       >
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -224,12 +225,12 @@ export function NotesPage({ accent }) {
             />
             <button
               onClick={handleAddTask}
-              style={{ ...inputStyle, padding: '4px 10px', cursor: 'pointer', background: T.bg3, color: accent, border: `1px solid ${T.border}` }}
+              style={{ ...inputStyle, padding: '4px 10px', cursor: 'pointer', background: T.bg3, color: T.accent, border: `1px solid ${T.border}` }}
             >+</button>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
             <TaskGroup label="overdue"  tasks={groups.overdue}  labelColor={T.danger}    onToggle={handleToggle} onDelete={handleDelete} />
-            <TaskGroup label="today"    tasks={groups.today}    labelColor={accent}      onToggle={handleToggle} onDelete={handleDelete} />
+            <TaskGroup label="today"    tasks={groups.today}    labelColor={T.accent}    onToggle={handleToggle} onDelete={handleDelete} />
             <TaskGroup label="upcoming" tasks={groups.upcoming} labelColor={T.textDim}   onToggle={handleToggle} onDelete={handleDelete} />
             <TaskGroup label="no date"  tasks={groups.noDate}   labelColor={T.textFaint} onToggle={handleToggle} onDelete={handleDelete} />
             {groups.done.length > 0 && (

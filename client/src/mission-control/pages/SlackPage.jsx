@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 import { Panel } from '../components/Panel.jsx';
 
 const API = 'http://localhost:3001/api';
@@ -17,14 +17,15 @@ function parseSections(text) {
   return sections;
 }
 
-function signalColor(bodyText, accent) {
-  if (bodyText.includes('Signal: high'))   return accent;
+function signalColor(bodyText, T) {
+  if (bodyText.includes('Signal: high'))   return T.accent;
   if (bodyText.includes('Signal: medium')) return T.warn;
   return T.textGhost;
 }
 
-function SectionCard({ section, accent }) {
-  const signal = signalColor(section.body.join('\n'), accent);
+function SectionCard({ section }) {
+  const T = useTheme();
+  const signal = signalColor(section.body.join('\n'), T);
   return (
     <div style={{ background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 5, padding: '12px 14px', marginBottom: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -43,9 +44,9 @@ function SectionCard({ section, accent }) {
   );
 }
 
-const linkBtn = { background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 9.5, fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', padding: 0 };
-
-export function SlackPage({ accent }) {
+export function SlackPage() {
+  const T = useTheme();
+  const linkBtn = { background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 9.5, fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', padding: 0 };
   const [sections, setSections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -122,7 +123,7 @@ export function SlackPage({ accent }) {
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
-      <Panel title="slack_digest" accent={accent} right={headerRight}>
+      <Panel title="slack_digest" right={headerRight}>
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
           {error && <div style={{ color: T.danger, fontSize: 11, marginBottom: 10 }}>{error}</div>}
           {showChannels && channels.length > 0 && (
@@ -131,7 +132,7 @@ export function SlackPage({ accent }) {
               <div style={{ maxHeight: 160, overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {channels.map(ch => (
                   <label key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', fontSize: 11, color: ch.isBlacklisted ? T.textGhost : T.text }}>
-                    <input type="checkbox" checked={!ch.isBlacklisted} onChange={() => toggleBlacklist(ch.id)} style={{ accentColor: accent }} />
+                    <input type="checkbox" checked={!ch.isBlacklisted} onChange={() => toggleBlacklist(ch.id)} style={{ accentColor: T.accent }} />
                     {ch.type === 'dm' ? 'dm' : ch.type === 'private' ? 'prv' : '#'} {ch.name}
                   </label>
                 ))}
@@ -139,7 +140,7 @@ export function SlackPage({ accent }) {
             </div>
           )}
           {(isLoading || (isGenerating && sections.length === 0)) ? skeleton
-            : sections.map((s) => <SectionCard key={s.heading} section={s} accent={accent} />)}
+            : sections.map((s) => <SectionCard key={s.heading} section={s} />)}
           {!isLoading && !isGenerating && sections.length === 0 && (
             <div style={{ color: T.textGhost, fontSize: 11, textAlign: 'center', paddingTop: 32 }}>no slack activity in the last 24h</div>
           )}

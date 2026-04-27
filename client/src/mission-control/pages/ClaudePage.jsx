@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 
 const API = 'http://localhost:3001/api';
 
@@ -20,6 +20,7 @@ function parseContent(text) {
 }
 
 function MessageBubble({ msg, isStreaming }) {
+  const T = useTheme();
   const isUser = msg.role === 'user';
   const parts = parseContent(msg.content);
   return (
@@ -52,9 +53,9 @@ function MessageBubble({ msg, isStreaming }) {
   );
 }
 
-const hdrBtn = { background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 3, color: T.textDim, cursor: 'pointer', fontSize: 10, padding: '3px 8px', fontFamily: 'ui-monospace, Menlo, monospace' };
-
-export function ClaudePage({ accent }) {
+export function ClaudePage() {
+  const T = useTheme();
+  const hdrBtn = { background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 3, color: T.textDim, cursor: 'pointer', fontSize: 10, padding: '3px 8px', fontFamily: 'ui-monospace, Menlo, monospace' };
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -169,7 +170,7 @@ export function ClaudePage({ accent }) {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 16px', background: T.bg1, borderBottom: `1px solid ${T.border}`, flexShrink: 0, fontSize: 10.5 }}>
-        <span style={{ color: accent }}>$ claude-chat</span>
+        <span style={{ color: T.accent }}>$ claude-chat</span>
         <span style={{ color: T.textGhost }}>claude-sonnet-4-5</span>
         <span style={{ color: T.textFaint }}>{exchangeCount} exchanges</span>
         <div style={{ flex: 1 }} />
@@ -191,7 +192,7 @@ export function ClaudePage({ accent }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, padding: '8px 16px', background: T.bg1, borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
-        <span style={{ color: accent, fontSize: 13, alignSelf: 'center' }}>{'>'}</span>
+        <span style={{ color: T.accent, fontSize: 13, alignSelf: 'center' }}>{'>'}</span>
         <textarea
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -203,7 +204,7 @@ export function ClaudePage({ accent }) {
         <button
           onClick={() => sendMessage()}
           disabled={isStreaming || !input.trim()}
-          style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 4, color: accent, cursor: 'pointer', fontSize: 11, padding: '0 12px', alignSelf: 'stretch', opacity: (isStreaming || !input.trim()) ? 0.4 : 1 }}
+          style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 4, color: T.accent, cursor: 'pointer', fontSize: 11, padding: '0 12px', alignSelf: 'stretch', opacity: (isStreaming || !input.trim()) ? 0.4 : 1 }}
         >
           {isStreaming ? '\u2026' : '\u23ce'}
         </button>

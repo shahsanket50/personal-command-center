@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 import { Panel } from '../components/Panel.jsx';
 
 const API = 'http://localhost:3001/api';
@@ -12,9 +12,9 @@ function nowFrac(date) {
   return (now.getHours() - 6) + now.getMinutes() / 60;
 }
 
-const btnStyle = { background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 9.5, fontFamily: 'inherit', padding: 0 };
-
-export function CalendarPage({ accent }) {
+export function CalendarPage() {
+  const T = useTheme();
+  const btnStyle = { background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 9.5, fontFamily: 'inherit', padding: 0 };
   const [date, setDate] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [status, setStatus] = useState({ google: null, microsoft: null });
@@ -51,13 +51,13 @@ export function CalendarPage({ accent }) {
       <button onClick={() => setDate(d => { const n = new Date(d); n.setDate(n.getDate() - 1); return n; })} style={btnStyle}>[ prev</button>
       <span style={{ color: T.textDim }}>{dateLabel(date)}</span>
       <button onClick={() => setDate(d => { const n = new Date(d); n.setDate(n.getDate() + 1); return n; })} style={btnStyle}>next ]</button>
-      <button onClick={() => setDate(new Date())} style={{ ...btnStyle, color: accent }}>t today</button>
+      <button onClick={() => setDate(new Date())} style={{ ...btnStyle, color: T.accent }}>t today</button>
     </div>
   );
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
-      <Panel title="calendar" accent={accent} right={headerRight}>
+      <Panel title="calendar" right={headerRight}>
         {connectWarning && (
           <div style={{ padding: '6px 12px', background: T.bg3, color: T.warn, fontSize: 10.5, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
             {status.google === false && 'Google Calendar disconnected — reconnect in /settings. '}
@@ -84,7 +84,7 @@ export function CalendarPage({ accent }) {
                     const end   = new Date(ev.end);
                     const isPast = end < now;
                     const isNow  = start <= now && now < end;
-                    const tagColor = ev.source === 'personal' ? '#10b981' : isNow ? accent : T.info;
+                    const tagColor = ev.source === 'personal' ? '#10b981' : isNow ? T.accent : T.info;
                     const startLabel = ev.start ? new Date(ev.start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
                     const isExpanded = expanded === (ev.id ?? j);
                     return (

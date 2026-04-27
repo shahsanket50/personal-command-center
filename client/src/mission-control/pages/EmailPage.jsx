@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 import { Panel } from '../components/Panel.jsx';
 
 const API = 'http://localhost:3001/api';
@@ -20,6 +20,7 @@ function parseSections(text) {
 const SECTION_LABELS = { 'Office Emails': '[o]', 'Personal Emails': '[p]', 'Email Insights': '[i]' };
 
 function SectionCard({ section }) {
+  const T = useTheme();
   const label = SECTION_LABELS[section.heading] ?? '[ ]';
   return (
     <div style={{ background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 5, padding: '12px 14px', marginBottom: 10 }}>
@@ -36,7 +37,8 @@ function SectionCard({ section }) {
   );
 }
 
-export function EmailPage({ accent }) {
+export function EmailPage() {
+  const T = useTheme();
   const [sections, setSections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -125,7 +127,7 @@ export function EmailPage({ accent }) {
   return (
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
       <style>{`@keyframes mc-skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
-      <Panel title="email_triage" accent={accent} right={headerRight}>
+      <Panel title="email_triage" right={headerRight}>
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
           {error && <div style={{ color: T.danger, fontSize: 11, marginBottom: 10 }}>{error}</div>}
           {(isLoading || (isGenerating && sections.length === 0)) ? skeleton
