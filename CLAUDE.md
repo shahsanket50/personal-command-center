@@ -101,6 +101,7 @@ Mission Control revamp complete — 3-pivot keyboard-first terminal interface re
   Keyboard: j/k cursor, Tab pane, g+t/i/p pivot, ? help overlay, ⌘K palette.
   New routes: GET /api/triage/items (Slack+Email+Cal classify), GET /api/people (Notion People DB).
 MC Navigation & Module Pages complete — three-row top bar, URL-based pivot routing, 8 MC-native full-page module routes (/notes /calendar /claude /brief /slack /email /settings /goals), task interactivity (toggle/delete) in Today panel TaskList, panel view-all click-throughs.
+Font size + theme system complete — 5 named themes (dark/light/paper/ocean/forest), React context via ThemeProvider/useTheme(), Settings Appearance tab with swatch picker, localStorage persistence, +2px font scale across all MC files, accent prop removed from all call sites.
 Next: Phase 7 — People & 1:1s deep dive (talking points, activity merge, claude prep streaming).
 
 ## Backlog (deferred cleanup)
@@ -142,3 +143,12 @@ Next: Phase 7 — People & 1:1s deep dive (talking points, activity merge, claud
 - Digest saved as "Email Digest · YYYY-MM-DD" in NOTION_DB_DAILY_BRIEFINGS; action items → NOTION_DB_ACTION_ITEMS
 - Action Items DB schema: Name (title) only — no Source/Status fields exist in Notion
 - New Claude helper: generateMorningBrief (streaming generator, same pattern as streamChat)
+
+## Font size + theme system notes
+- Theme tokens: THEMES map in theme.js (dark/light/paper/ocean/forest), each with bg0-bg4, border/borderHi, text/textHi/textDim/textFaint/textGhost, warn/danger/info, accent
+- ThemeContext.jsx: ThemeProvider wraps the app in App.jsx; useTheme() hook replaces static `import { T }` across all ~22 MC files
+- Context value shape: `{ ...THEMES[themeName], themeName, setTheme }` — themeName and setTheme exposed for the picker
+- Persistence: localStorage key `mc-theme`; default is `dark`
+- Appearance tab in SettingsPage: THEME_NAMES.map renders swatch buttons (bg0 background + accent circle); active theme shows white ring
+- accent prop removed from all MC page/panel call sites — components read T.accent from useTheme() directly
+- Font scale: +2px applied to all inline fontSize values in MC files (8→10, 9→11, 10→12, 11→13, etc.)
