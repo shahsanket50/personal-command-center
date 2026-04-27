@@ -42,6 +42,7 @@ function EventRow({ ev, accent, onNavigate }) {
         textDecoration: isPast ? 'line-through' : 'none',
         cursor: 'pointer',
       }}
+    >
       <span style={{ color: T.textFaint, fontSize: 10, minWidth: 36 }}>{startLabel.replace(':', '')}</span>
       {isNow && <span style={{ color: '#10b981', animation: 'mc-pulse 1.6s infinite' }}>●</span>}
       <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
