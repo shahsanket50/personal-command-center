@@ -32,7 +32,7 @@ export function getGoogleAuthUrl() {
   return oauth2.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
-    scope: ['https://www.googleapis.com/auth/calendar.readonly'],
+    scope: ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/gmail.readonly'],
   });
 }
 
@@ -98,6 +98,7 @@ export async function getGoogleEvents(dateStr) {
     allDay: !e.start.dateTime,
     source: 'personal',
     location: e.location ?? null,
+    attendeeCount: (e.attendees || []).length,
   }));
 }
 
@@ -141,6 +142,7 @@ export async function getMSEvents(dateStr) {
     allDay: e.isAllDay ?? false,
     source: 'office',
     location: e.location?.displayName ?? null,
+    attendeeCount: (e.attendees || []).length,
   }));
 }
 

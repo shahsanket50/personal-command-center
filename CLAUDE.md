@@ -91,7 +91,20 @@ Phase 1 complete — Claude CLI module built (streaming, history, syntax highlig
 Phase 2 complete — Notes & Tasks module (daily notes, task CRUD, overdue banner on app open).
 Phase 3 complete — Calendar module (Google Calendar + Microsoft Graph OAuth, merged day view, OOO flags).
 Phase 4 complete — Morning Brief (Claude-generated daily summary, SSE streaming, written to Notion, cards theme).
-Next: Phase 5 — Slack digest + Email triage (dual account: MS Graph + Gmail).
+Phase 5 complete — Slack Digest (all joined channels/DMs, Claude triage, channel blacklist, action items → Notion, cards theme).
+Phase 6 complete — Email Triage (Gmail + Outlook unread, Claude dual-account summary, action items → Notion, cards theme).
+Mission Control revamp complete — 3-pivot keyboard-first terminal interface replacing the 9-module sidebar:
+  Today pivot: schedule_today (calendar events + now-line), action_queue (ranked tasks), morning_brief (SSE), triage snapshot, people cadence.
+  Triage pivot: unified stream (Slack DMs/mentions, email reply/fyi, cal invites), lane filter chips, focus detail pane, urgent ambient sidebar.
+  People pivot: team roster from Notion PEOPLE DB + person detail with cadence status and claude prep.
+  Command palette (⌘K): /task, /note, /brief, /today, /triage, /people working end-to-end.
+  Keyboard: j/k cursor, Tab pane, g+t/i/p pivot, ? help overlay, ⌘K palette.
+  New routes: GET /api/triage/items (Slack+Email+Cal classify), GET /api/people (Notion People DB).
+MC Navigation & Module Pages complete — three-row top bar, URL-based pivot routing, 8 MC-native full-page module routes (/notes /calendar /claude /brief /slack /email /settings /goals), task interactivity (toggle/delete) in Today panel TaskList, panel view-all click-throughs.
+Next: Phase 7 — People & 1:1s deep dive (talking points, activity merge, claude prep streaming).
+
+## Backlog (deferred cleanup)
+- Remove `client/src/modules/` entirely once all MC pages (`client/src/mission-control/pages/`) are stable and verified. Old modules are no longer routed but kept as reference during the migration.
 
 ## Phase 2 & 3 notes
 - Daily notes stored in NOTION_DB_DAILY_BRIEFINGS, distinguished by title prefix "Daily Note · YYYY-MM-DD"
@@ -111,4 +124,21 @@ Next: Phase 5 — Slack digest + Email triage (dual account: MS Graph + Gmail).
 - Client auto-fetches cached brief on mount; auto-generates if none found for today
 - Sections parsed client-side from ## headings; each section rendered as a card (cards theme)
 - New Notion helpers: getDueTodayTasks, saveBriefing, getLatestBriefingForDate, briefMarkdownToBlocks, reconstructBriefMarkdown
+
+## Phase 5 notes
+- Slack routes: GET /api/slack/channels, GET /api/slack/digest, POST /api/slack/digest/generate (SSE), POST /api/slack/blacklist
+- Fetches all joined public/private/MPIM/DM channels; filters blacklisted channels via SLACK_BLACKLIST_CHANNELS env var
+- Digest saved to NOTION_DB_DAILY_BRIEFINGS as "Slack Digest · YYYY-MM-DD"; action items ("- [ ]" lines) → NOTION_DB_ACTION_ITEMS (Name only)
+- Blacklist persisted to .env on disk via persistEnvVar helper in slack route
+- Server dependency added: @slack/web-api
+- Google OAuth scope updated to include gmail.readonly (in services/calendar.js)
+- Microsoft OAuth scope updated to include Mail.Read (in services/outlook.js); acquireTokenSilent now uses full SCOPES array
+
+## Phase 6 notes
+- Email routes: GET /api/email/status, GET /api/email/digest, POST /api/email/digest/generate (SSE)
+- Gmail: fetchUnreadGmailEmails in services/gmail.js — reuses google-credentials.json token, mirrors calendar.js refresh pattern
+- Outlook: fetchUnreadOutlookEmails in services/outlook.js — raw Graph API fetch (no SDK), Mail.Read scope required
+- Re-authorization required for both accounts after scope additions (old tokens lack email scopes)
+- Digest saved as "Email Digest · YYYY-MM-DD" in NOTION_DB_DAILY_BRIEFINGS; action items → NOTION_DB_ACTION_ITEMS
+- Action Items DB schema: Name (title) only — no Source/Status fields exist in Notion
 - New Claude helper: generateMorningBrief (streaming generator, same pattern as streamChat)

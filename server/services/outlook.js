@@ -1,6 +1,6 @@
 // Microsoft Graph service — office Outlook email + Outlook Calendar (Phase 3 & 6)
 // Auth: Azure AD OAuth2 via MSAL (@azure/msal-node)
-// Scope: Calendars.Read, offline_access
+// Scope: Calendars.Read, Mail.Read, offline_access
 // Token stored in ms-token.json (gitignored)
 
 import { ConfidentialClientApplication } from '@azure/msal-node';
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MS_TOKEN_PATH = path.resolve(__dirname, '../../ms-token.json');
 const REDIRECT_URI = 'http://localhost:3001/api/auth/microsoft/callback';
-const SCOPES = ['Calendars.Read', 'offline_access'];
+const SCOPES = ['Calendars.Read', 'Mail.Read', 'offline_access'];
 
 export function getMSGraphConfig() {
   const required = ['MS_CLIENT_ID', 'MS_CLIENT_SECRET', 'MS_TENANT_ID'];
@@ -101,7 +101,7 @@ export async function getMSAccessToken() {
     const accounts = await app.getTokenCache().getAllAccounts();
     if (accounts.length > 0) {
       const result = await app.acquireTokenSilent({
-        scopes: ['Calendars.Read'],
+        scopes: SCOPES,
         account: accounts[0],
       });
       const msalCache = app.getTokenCache().serialize();
@@ -114,4 +114,41 @@ export async function getMSAccessToken() {
   }
 
   throw new Error('Microsoft token expired — please reconnect');
+}
+
+/**
+ * Fetch unread emails from the Office Outlook inbox via Microsoft Graph.
+ * @param {{ maxResults?: number }} options
+ * @returns {Promise<Array<{ id: string, subject: string, from: string, date: string, snippet: string, account: string, source: string }>>}
+ */
+export async function fetchUnreadOutlookEmails({ maxResults = 30 } = {}) {
+  const accessToken = await getMSAccessToken();
+
+  const url =
+    `https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages` +
+    `?$filter=isRead%20eq%20false` +
+    `&$select=subject,from,receivedDateTime,bodyPreview` +
+    `&$orderby=receivedDateTime%20desc` +
+    `&$top=${maxResults}`;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Microsoft Graph mail fetch failed (${res.status}): ${text}`);
+  }
+
+  const data = await res.json();
+
+  return (data.value || []).map(msg => ({
+    id: msg.id,
+    subject: msg.subject || '(no subject)',
+    from: msg.from?.emailAddress?.address || 'unknown',
+    date: msg.receivedDateTime || '',
+    snippet: msg.bodyPreview || '',
+    account: 'office',
+    source: 'Outlook',
+  }));
 }
