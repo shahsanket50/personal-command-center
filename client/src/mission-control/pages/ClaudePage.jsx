@@ -65,14 +65,12 @@ export function ClaudePage({ accent }) {
   const abortRef = useRef(null);
   const bottomRef = useRef(null);
   const autoSubmitted = useRef(false);
+  const messagesRef = useRef([]);
+
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
 
   useEffect(() => {
-    const q = searchParams.get('q');
-    if (q && !autoSubmitted.current) {
-      autoSubmitted.current = true;
-      const decoded = decodeURIComponent(q);
-      setTimeout(() => sendMessage(decoded), 100);
-    }
+    return () => { abortRef.current?.abort(); };
   }, []);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
@@ -99,16 +97,20 @@ export function ClaudePage({ accent }) {
         headers: { 'Content-Type': 'application/json' },
         signal: ctrl.signal,
         body: JSON.stringify({
-          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
+          messages: [...messagesRef.current, userMsg].map(m => ({ role: m.role, content: m.content })),
         }),
       });
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
+      let buf = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        for (const line of decoder.decode(value).split('\n')) {
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop() ?? '';
+        for (const line of lines) {
           if (!line.startsWith('data:')) continue;
           const payload = line.slice(5).trim();
           if (payload === '[DONE]') break;
@@ -126,7 +128,16 @@ export function ClaudePage({ accent }) {
       setIsStreaming(false);
       abortRef.current = null;
     }
-  }, [input, isStreaming, messages]);
+  }, [input, isStreaming]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q && !autoSubmitted.current) {
+      autoSubmitted.current = true;
+      sendMessage(decodeURIComponent(q));
+    }
+  }, [sendMessage]);
 
   async function handleSave() {
     setSaveStatus('saving\u2026');
