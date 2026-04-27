@@ -17,14 +17,14 @@ function parseSections(text) {
   return sections;
 }
 
-function signalColor(bodyText) {
-  if (bodyText.includes('Signal: high'))   return T.accent;
+function signalColor(bodyText, accent) {
+  if (bodyText.includes('Signal: high'))   return accent;
   if (bodyText.includes('Signal: medium')) return T.warn;
   return T.textGhost;
 }
 
-function SectionCard({ section }) {
-  const signal = signalColor(section.body.join('\n'));
+function SectionCard({ section, accent }) {
+  const signal = signalColor(section.body.join('\n'), accent);
   return (
     <div style={{ background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 5, padding: '12px 14px', marginBottom: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -63,11 +63,13 @@ export function SlackPage({ accent }) {
     setIsLoading(true);
     try {
       const res = await fetch(`${API}/slack/digest`);
+      if (!res.ok) throw new Error(`digest fetch failed: ${res.status}`);
       const data = await res.json();
       if (data) { setSections(parseSections(data)); setGeneratedAt(new Date().toLocaleTimeString()); }
-      else await generate();
-    } catch { await generate(); }
-    finally { setIsLoading(false); }
+      else { setIsLoading(false); await generate(); return; }
+    } catch (e) {
+      setError(e.message);
+    } finally { setIsLoading(false); }
   }
 
   async function generate() {
@@ -89,10 +91,21 @@ export function SlackPage({ accent }) {
   }
 
   async function toggleBlacklist(channelId) {
+    const before = channels;
     const updated = channels.map(c => c.id === channelId ? { ...c, isBlacklisted: !c.isBlacklisted } : c);
     setChannels(updated);
     const blacklisted = updated.filter(c => c.isBlacklisted).map(c => c.id);
-    await fetch(`${API}/slack/blacklist`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ channelIds: blacklisted }) });
+    try {
+      const res = await fetch(`${API}/slack/blacklist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channelIds: blacklisted }),
+      });
+      if (!res.ok) throw new Error(`blacklist save failed: ${res.status}`);
+    } catch (e) {
+      setChannels(before);
+      setError(e.message);
+    }
   }
 
   const skeleton = Array.from({ length: 4 }, (_, i) => (
@@ -126,7 +139,7 @@ export function SlackPage({ accent }) {
             </div>
           )}
           {(isLoading || (isGenerating && sections.length === 0)) ? skeleton
-            : sections.map((s, i) => <SectionCard key={i} section={s} />)}
+            : sections.map((s) => <SectionCard key={s.heading} section={s} accent={accent} />)}
           {!isLoading && !isGenerating && sections.length === 0 && (
             <div style={{ color: T.textGhost, fontSize: 11, textAlign: 'center', paddingTop: 32 }}>no slack activity in the last 24h</div>
           )}
