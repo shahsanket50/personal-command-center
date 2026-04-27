@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { T } from '../theme.js';
+import { THEME_NAMES, THEMES } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 import { Panel } from '../components/Panel.jsx';
 
 const API = 'http://localhost:3001/api';
@@ -30,13 +31,14 @@ const FIELDS = {
   ],
 };
 
-function SecretField({ field, value, onChange, accent }) {
+function SecretField({ field, value, onChange }) {
+  const T = useTheme();
   const [show, setShow] = useState(false);
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ fontSize: 10.5, color: T.textDim, marginBottom: 4 }}>
         {field.label}
-        {value && <span style={{ marginLeft: 8, color: accent, fontSize: 9 }}>● set</span>}
+        {value && <span style={{ marginLeft: 8, color: T.accent, fontSize: 9 }}>● set</span>}
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
         <input
@@ -60,7 +62,9 @@ function SecretField({ field, value, onChange, accent }) {
   );
 }
 
-export function SettingsPage({ accent }) {
+export function SettingsPage() {
+  const T = useTheme();
+  const { themeName, setTheme } = T;
   const [activeTab, setActiveTab] = useState('Accounts');
   const [values, setValues] = useState({});
   const [saveStatus, setSaveStatus] = useState('');
@@ -102,13 +106,13 @@ export function SettingsPage({ accent }) {
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
-      <Panel title="settings" accent={accent}>
+      <Panel title="settings" accent={T.accent}>
         <div style={{ display: 'flex', borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-          {['Accounts', 'Notion'].map(tab => (
+          {['Accounts', 'Notion', 'Appearance'].map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)} style={{
               padding: '8px 16px', background: 'transparent', border: 'none', cursor: 'pointer',
-              color: activeTab === tab ? accent : T.textDim, fontSize: 11,
-              borderBottom: activeTab === tab ? `2px solid ${accent}` : '2px solid transparent',
+              color: activeTab === tab ? T.accent : T.textDim, fontSize: 11,
+              borderBottom: activeTab === tab ? `2px solid ${T.accent}` : '2px solid transparent',
               fontFamily: 'inherit',
             }}>{tab}</button>
           ))}
@@ -120,23 +124,65 @@ export function SettingsPage({ accent }) {
                 {f.label.toUpperCase()}
               </div>
             );
-            return <SecretField key={f.key} field={f} value={values[f.key] ?? ''} onChange={handleChange} accent={accent} />;
+            return <SecretField key={f.key} field={f} value={values[f.key] ?? ''} onChange={handleChange} />;
           })}
           {activeTab === 'Notion' && (
             <div style={{ marginTop: 8 }}>
               <button onClick={handleTestNotion} style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 3, color: T.textDim, cursor: 'pointer', fontSize: 10.5, padding: '5px 12px', fontFamily: 'inherit' }}>
                 Test Notion Connection
               </button>
-              {notionTest && <span style={{ marginLeft: 10, fontSize: 10.5, color: notionTest.startsWith('connected') ? accent : T.danger }}>{notionTest}</span>}
+              {notionTest && <span style={{ marginLeft: 10, fontSize: 10.5, color: notionTest.startsWith('connected') ? T.accent : T.danger }}>{notionTest}</span>}
+            </div>
+          )}
+          {activeTab === 'Appearance' && (
+            <div>
+              <div style={{ fontSize: 10.5, color: T.textDim, marginBottom: 12 }}>
+                theme
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                {THEME_NAMES.map(name => {
+                  const th = THEMES[name];
+                  const active = name === themeName;
+                  return (
+                    <button
+                      key={name}
+                      onClick={() => setTheme(name)}
+                      title={name}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                        background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+                      }}
+                    >
+                      <div style={{
+                        width: 48, height: 48, borderRadius: 8,
+                        background: th.bg0,
+                        border: active ? `2px solid ${T.textHi}` : `2px solid ${T.border}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: active ? `0 0 0 1px ${th.accent}` : 'none',
+                      }}>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: th.accent }} />
+                      </div>
+                      <span style={{
+                        fontSize: 9.5, color: active ? T.textHi : T.textFaint,
+                        fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
+                      }}>
+                        {name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '10px 20px', borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
-          {saveStatus && <span style={{ fontSize: 10.5, color: saveStatus === 'error' ? T.danger : T.textDim }}>{saveStatus}</span>}
-          <button onClick={handleSave} style={{ background: T.bg3, border: `1px solid ${T.borderHi}`, borderRadius: 3, color: accent, cursor: 'pointer', fontSize: 11, padding: '5px 16px', fontFamily: 'inherit' }}>
-            Save
-          </button>
-        </div>
+        {activeTab !== 'Appearance' && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '10px 20px', borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
+            {saveStatus && <span style={{ fontSize: 10.5, color: saveStatus === 'error' ? T.danger : T.textDim }}>{saveStatus}</span>}
+            <button onClick={handleSave} style={{ background: T.bg3, border: `1px solid ${T.borderHi}`, borderRadius: 3, color: T.accent, cursor: 'pointer', fontSize: 11, padding: '5px 16px', fontFamily: 'inherit' }}>
+              Save
+            </button>
+          </div>
+        )}
       </Panel>
     </div>
   );

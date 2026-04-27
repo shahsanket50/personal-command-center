@@ -43,7 +43,7 @@ export const THEMES = {
 };
 
 export const DEFAULT_THEME = 'dark';
-export const THEME_NAMES = ['dark', 'light', 'paper', 'ocean', 'forest'];
+export const THEME_NAMES = Object.keys(THEMES);
 
 export const LANE_META = {
   dm:        { label: 'DMs',          color: '#36C5F0', desc: 'direct messages' },
