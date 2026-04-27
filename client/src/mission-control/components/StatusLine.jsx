@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 
 const API = 'http://localhost:3001/api';
 
-export function StatusLine({ accent }) {
+export function StatusLine() {
+  const T = useTheme();
   const [status, setStatus] = useState({ google: null, microsoft: null, gmail: null });
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export function StatusLine({ accent }) {
       {v === null
         ? <span style={{ color: T.textGhost }}>…</span>
         : v
-          ? <span style={{ color: accent }}>ok</span>
+          ? <span style={{ color: T.accent }}>ok</span>
           : <span style={{ color: T.danger }}>disconnected</span>}
     </span>
   );
@@ -35,7 +36,7 @@ export function StatusLine({ accent }) {
       fontSize: 10.5, color: T.textFaint, background: T.bg0,
       borderBottom: `1px solid ${T.border}`, flexShrink: 0, whiteSpace: 'nowrap',
     }}>
-      <span style={{ color: accent }}>● connected</span>
+      <span style={{ color: T.accent }}>● connected</span>
       <Dot v={status.microsoft} label="ms-graph" />
       <Dot v={status.gmail} label="gmail" />
       <span style={{ color: T.textGhost }}>·</span>

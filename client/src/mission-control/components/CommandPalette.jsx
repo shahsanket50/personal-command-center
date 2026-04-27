@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 
 const COMMANDS = [
   { k: '/task',   d: 'Add a task to Notion',         shortcut: 't' },
@@ -19,7 +19,8 @@ const CmdIcon = () => (
   </svg>
 );
 
-export function CommandPalette({ open, onClose, accent, onCommand }) {
+export function CommandPalette({ open, onClose, onCommand }) {
+  const T = useTheme();
   const [q, setQ] = useState('');
   const [idx, setIdx] = useState(0);
   const [status, setStatus] = useState('');
@@ -62,10 +63,10 @@ export function CommandPalette({ open, onClose, accent, onCommand }) {
       <div onClick={(e) => e.stopPropagation()} style={{
         width: 580, borderRadius: 10, overflow: 'hidden',
         background: T.bg2, border: `1px solid ${T.borderHi}`,
-        boxShadow: `0 24px 60px rgba(0,0,0,.5), 0 0 0 1px ${accent}33`,
+        boxShadow: `0 24px 60px rgba(0,0,0,.5), 0 0 0 1px ${T.accent}33`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: `1px solid ${T.border}` }}>
-          <span style={{ color: accent }}><CmdIcon /></span>
+          <span style={{ color: T.accent }}><CmdIcon /></span>
           <input
             ref={inputRef}
             value={q}
@@ -89,17 +90,17 @@ export function CommandPalette({ open, onClose, accent, onCommand }) {
             <div key={c.k} onClick={() => setIdx(i)} style={{
               display: 'flex', alignItems: 'center', gap: 10, padding: '7px 12px', borderRadius: 5,
               background: i === idx ? T.bg4 : 'transparent',
-              borderLeft: i === idx ? `2px solid ${accent}` : '2px solid transparent',
+              borderLeft: i === idx ? `2px solid ${T.accent}` : '2px solid transparent',
               cursor: 'pointer',
             }}>
-              <code style={{ fontSize: 12, color: i === idx ? accent : T.textDim, fontWeight: 600, minWidth: 70, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.k}</code>
+              <code style={{ fontSize: 12, color: i === idx ? T.accent : T.textDim, fontWeight: 600, minWidth: 70, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.k}</code>
               <span style={{ fontSize: 12.5, flex: 1, color: i === idx ? T.textHi : T.text }}>{c.d}</span>
               <kbd style={{ fontSize: 10, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.shortcut}</kbd>
             </div>
           ))}
         </div>
 
-        <div style={{ padding: '7px 14px', fontSize: 10, borderTop: `1px solid ${T.border}`, background: T.bg0, color: status ? accent : T.textGhost, fontFamily: 'ui-monospace, Menlo, monospace', display: 'flex', gap: 14 }}>
+        <div style={{ padding: '7px 14px', fontSize: 10, borderTop: `1px solid ${T.border}`, background: T.bg0, color: status ? T.accent : T.textGhost, fontFamily: 'ui-monospace, Menlo, monospace', display: 'flex', gap: 14 }}>
           {status
             ? <span>{status}</span>
             : <><span>up/down pick</span><span>enter run</span><span>esc close</span></>}

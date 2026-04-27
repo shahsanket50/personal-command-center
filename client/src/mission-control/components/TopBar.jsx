@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { T, PIVOTS } from '../theme.js';
+import { PIVOTS } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 
 const API = 'http://localhost:3001/api';
 
@@ -32,7 +33,8 @@ function useConnectionStatus() {
   return status;
 }
 
-export function TopBar({ onCmd, accent }) {
+export function TopBar({ onCmd }) {
+  const T = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const conn = useConnectionStatus();
@@ -41,7 +43,7 @@ export function TopBar({ onCmd, accent }) {
 
   function dotColor(v) {
     if (v === null) return T.textGhost;
-    return v ? accent : T.danger;
+    return v ? T.accent : T.danger;
   }
 
   return (
@@ -51,7 +53,7 @@ export function TopBar({ onCmd, accent }) {
         display: 'flex', alignItems: 'center', height: 28, padding: '0 12px', gap: 10,
         background: T.bg0, borderBottom: `1px solid ${T.border}`,
       }}>
-        <span style={{ color: accent, fontSize: 9, letterSpacing: '.12em', fontWeight: 700 }}>
+        <span style={{ color: T.accent, fontSize: 9, letterSpacing: '.12em', fontWeight: 700 }}>
           MISSION CONTROL
         </span>
         <div style={{ flex: 1 }} />
@@ -86,9 +88,9 @@ export function TopBar({ onCmd, accent }) {
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '0 14px', height: '100%', border: 'none', cursor: 'pointer',
                 background: 'transparent',
-                color: active ? accent : T.textDim,
+                color: active ? T.accent : T.textDim,
                 fontSize: 9.5,
-                borderBottom: active ? `2px solid ${accent}` : '2px solid transparent',
+                borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
               }}
             >
               {p.label}
@@ -113,9 +115,9 @@ export function TopBar({ onCmd, accent }) {
               style={{
                 padding: '0 10px', height: '100%', border: 'none', cursor: 'pointer',
                 background: 'transparent',
-                color: active ? accent : T.textDim,
+                color: active ? T.accent : T.textDim,
                 fontSize: 8,
-                borderBottom: active ? `2px solid ${accent}` : '2px solid transparent',
+                borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
               }}
             >
               {m.label}
@@ -129,10 +131,10 @@ export function TopBar({ onCmd, accent }) {
           style={{
             padding: '0 10px', height: '100%', border: 'none', cursor: 'pointer',
             background: 'transparent',
-            color: location.pathname === '/settings' ? accent : T.textFaint,
+            color: location.pathname === '/settings' ? T.accent : T.textFaint,
             fontSize: 8,
             borderLeft: `1px solid ${T.border}`,
-            borderBottom: location.pathname === '/settings' ? `2px solid ${accent}` : '2px solid transparent',
+            borderBottom: location.pathname === '/settings' ? `2px solid ${T.accent}` : '2px solid transparent',
           }}
         >
           Settings ⟶

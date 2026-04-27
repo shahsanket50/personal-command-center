@@ -1,5 +1,5 @@
 import React from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 
 const GROUPS = [
   { title: 'navigation', items: [
@@ -24,7 +24,8 @@ const GROUPS = [
   ]},
 ];
 
-export function HelpOverlay({ open, onClose, accent }) {
+export function HelpOverlay({ open, onClose }) {
+  const T = useTheme();
   if (!open) return null;
 
   return (
@@ -39,7 +40,7 @@ export function HelpOverlay({ open, onClose, accent }) {
         fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-          <span style={{ color: accent }}>◆</span>
+          <span style={{ color: T.accent }}>◆</span>
           <h2 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: T.textHi }}>keyboard reference</h2>
           <span style={{ flex: 1 }} />
           <kbd style={{ fontSize: 10, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim }}>esc</kbd>
@@ -47,7 +48,7 @@ export function HelpOverlay({ open, onClose, accent }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 22 }}>
           {GROUPS.map((g) => (
             <div key={g.title}>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: accent, marginBottom: 8 }}>{g.title}</div>
+              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent, marginBottom: 8 }}>{g.title}</div>
               {g.items.map(([k, d]) => (
                 <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11.5 }}>
                   <span style={{ color: T.text }}>{d}</span>

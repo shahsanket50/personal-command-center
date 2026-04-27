@@ -1,15 +1,17 @@
 import React from 'react';
-import { T } from '../theme.js';
-
-const K = ({ children }) => (
-  <kbd style={{
-    fontSize: 9.5, padding: '1px 4px', borderRadius: 3,
-    background: T.bg3, border: `1px solid ${T.border}`,
-    color: T.textDim, fontFamily: 'ui-monospace, Menlo, monospace',
-  }}>{children}</kbd>
-);
+import { useTheme } from '../ThemeContext.jsx';
 
 export function KeyHints({ pivot, panelFocus }) {
+  const T = useTheme();
+
+  const K = ({ children }) => (
+    <kbd style={{
+      fontSize: 9.5, padding: '1px 4px', borderRadius: 3,
+      background: T.bg3, border: `1px solid ${T.border}`,
+      color: T.textDim, fontFamily: 'ui-monospace, Menlo, monospace',
+    }}>{children}</kbd>
+  );
+
   return (
     <div style={{
       display: 'flex', gap: 13, padding: '5px 14px',
