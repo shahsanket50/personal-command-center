@@ -50,9 +50,12 @@ export function EmailPage({ accent }) {
   }, []);
 
   async function fetchCached() {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setIsLoading(true);
     try {
-      const res = await fetch(`${API}/email/digest`);
+      const res = await fetch(`${API}/email/digest`, { signal: controller.signal });
       if (!res.ok) throw new Error(`digest fetch failed: ${res.status}`);
       const data = await res.json();
       if (data) {
@@ -64,7 +67,7 @@ export function EmailPage({ accent }) {
         return;
       }
     } catch (e) {
-      setError(e.message);
+      if (e.name !== 'AbortError') setError(e.message);
     } finally {
       setIsLoading(false);
     }
