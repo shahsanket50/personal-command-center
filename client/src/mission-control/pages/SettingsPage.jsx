@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { T } from '../theme.js';
 import { Panel } from '../components/Panel.jsx';
 
@@ -65,6 +65,7 @@ export function SettingsPage({ accent }) {
   const [values, setValues] = useState({});
   const [saveStatus, setSaveStatus] = useState('');
   const [notionTest, setNotionTest] = useState(null);
+  const notionTestTimerRef = useRef(null);
 
   useEffect(() => {
     fetch(`${API}/settings`).then(r => r.json()).then(data => {
@@ -72,12 +73,17 @@ export function SettingsPage({ accent }) {
     }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    return () => clearTimeout(notionTestTimerRef.current);
+  }, []);
+
   function handleChange(key, val) { setValues(prev => ({ ...prev, [key]: val })); }
 
   async function handleSave() {
     setSaveStatus('saving...');
     try {
-      await fetch(`${API}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ values }) });
+      const res = await fetch(`${API}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ values }) });
+      if (!res.ok) throw new Error(`save failed: ${res.status}`);
       setSaveStatus('saved'); setTimeout(() => setSaveStatus(''), 2000);
     } catch { setSaveStatus('error'); }
   }
@@ -89,7 +95,7 @@ export function SettingsPage({ accent }) {
       const data = await res.json();
       setNotionTest(data.ok ? 'connected' : 'failed: ' + (data.error ?? 'unknown'));
     } catch { setNotionTest('request failed'); }
-    setTimeout(() => setNotionTest(null), 4000);
+    notionTestTimerRef.current = setTimeout(() => setNotionTest(null), 4000);
   }
 
   const fields = FIELDS[activeTab] ?? [];
