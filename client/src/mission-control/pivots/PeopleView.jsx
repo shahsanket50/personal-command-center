@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 import { Panel } from '../components/Panel.jsx';
 import { PeoplePanel } from '../panels/PeoplePanel.jsx';
 
@@ -12,11 +12,12 @@ function last1on1Label(dateStr) {
   return `${Math.floor(days / 7)} wks ago`;
 }
 
-function ActionBtn({ children, primary, accent, hot }) {
+function ActionBtn({ children, primary, hot }) {
+  const T = useTheme();
   return (
     <button style={{
       display: 'flex', alignItems: 'center', gap: 6, padding: '4px 9px',
-      background: primary ? accent : T.bg3,
+      background: primary ? T.accent : T.bg3,
       color: primary ? T.bg0 : T.text,
       border: primary ? 'none' : `1px solid ${T.border}`,
       borderRadius: 4, cursor: 'pointer', fontSize: 11.5, fontWeight: 600,
@@ -28,7 +29,8 @@ function ActionBtn({ children, primary, accent, hot }) {
   );
 }
 
-function PersonDetail({ person, accent }) {
+function PersonDetail({ person }) {
+  const T = useTheme();
   if (!person) return <div style={{ padding: '32px 22px', color: T.textGhost, fontSize: 12, fontFamily: 'ui-monospace, Menlo, monospace' }}>select a person with j/k</div>;
 
   const isOverdue = !person.last1on1 || (Date.now() - new Date(person.last1on1).getTime()) > 14 * 86400000;
@@ -50,33 +52,33 @@ function PersonDetail({ person, accent }) {
         <div style={{ flex: 1 }} />
         {person.notionUrl && (
           <a href={person.notionUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-            <ActionBtn primary accent={accent} hot="enter">open 1:1 doc</ActionBtn>
+            <ActionBtn primary hot="enter">open 1:1 doc</ActionBtn>
           </a>
         )}
-        <ActionBtn accent={accent} hot="c">claude prep</ActionBtn>
+        <ActionBtn hot="c">claude prep</ActionBtn>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginTop: 22 }}>
         <div>
-          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: accent }}>cadence</div>
+          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>cadence</div>
           <div style={{ marginTop: 8, fontSize: 12, color: T.text, lineHeight: 1.7 }}>
             <div>last 1:1: {last1on1Label(person.last1on1)}</div>
-            <div>status: {isOverdue ? <span style={{ color: T.warn }}>overdue</span> : <span style={{ color: accent }}>on track</span>}</div>
+            <div>status: {isOverdue ? <span style={{ color: T.warn }}>overdue</span> : <span style={{ color: T.accent }}>on track</span>}</div>
           </div>
 
-          <div style={{ marginTop: 18, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: accent }}>talking points</div>
+          <div style={{ marginTop: 18, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>talking points</div>
           <div style={{ marginTop: 6, fontSize: 11.5, color: T.textDim }}>
-            Use <span style={{ color: accent }}>/1on1 {(person.name ?? '').split(' ')[0]?.toLowerCase()}</span> to pull from 1:1 notes.
+            Use <span style={{ color: T.accent }}>/1on1 {(person.name ?? '').split(' ')[0]?.toLowerCase()}</span> to pull from 1:1 notes.
           </div>
         </div>
 
         <div>
-          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: accent }}>recent activity</div>
+          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>recent activity</div>
           <div style={{ marginTop: 8, fontSize: 11, color: T.textDim, lineHeight: 1.7 }}>
             Activity stream (Slack + calendar + email) — Phase 7.
           </div>
-          <div style={{ marginTop: 22, padding: '10px 12px', background: T.bg3, borderLeft: `2px solid ${accent}`, fontSize: 11.5, color: T.textDim, lineHeight: 1.55 }}>
-            <span style={{ color: accent }}>last 1:1 notes</span> — open Notion doc for full notes.
+          <div style={{ marginTop: 22, padding: '10px 12px', background: T.bg3, borderLeft: `2px solid ${T.accent}`, fontSize: 11.5, color: T.textDim, lineHeight: 1.55 }}>
+            <span style={{ color: T.accent }}>last 1:1 notes</span> — open Notion doc for full notes.
           </div>
         </div>
       </div>
@@ -84,7 +86,8 @@ function PersonDetail({ person, accent }) {
   );
 }
 
-export function PeopleView({ panelFocus, cursors, accent, onPeopleLoaded }) {
+export function PeopleView({ panelFocus, cursors, onPeopleLoaded }) {
+  const T = useTheme();
   const [people, setPeople] = useState([]);
   const [selected, setSelected] = useState(null);
 
@@ -98,11 +101,11 @@ export function PeopleView({ panelFocus, cursors, accent, onPeopleLoaded }) {
 
   return (
     <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '300px 1fr', gap: 1, background: T.border, overflow: 'hidden', minHeight: 0 }}>
-      <Panel title="team" hint="j/k" focused={panelFocus === 'people'} accent={accent}>
-        <PeoplePanel focused={panelFocus === 'people'} cursor={cursors.people} accent={accent} onLoaded={handleLoaded} onSelect={setSelected} />
+      <Panel title="team" hint="j/k" focused={panelFocus === 'people'}>
+        <PeoplePanel focused={panelFocus === 'people'} cursor={cursors.people} onLoaded={handleLoaded} onSelect={setSelected} />
       </Panel>
-      <Panel title={currentPerson ? `person · ${currentPerson.name.toLowerCase()}` : 'person'} focused={panelFocus === 'detail'} accent={accent}>
-        <PersonDetail person={currentPerson} accent={accent} />
+      <Panel title={currentPerson ? `person · ${currentPerson.name.toLowerCase()}` : 'person'} focused={panelFocus === 'detail'}>
+        <PersonDetail person={currentPerson} />
       </Panel>
     </div>
   );

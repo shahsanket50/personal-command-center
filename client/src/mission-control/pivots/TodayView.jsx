@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 import { Panel } from '../components/Panel.jsx';
 import { Schedule } from '../panels/Schedule.jsx';
 import { TaskList } from '../panels/TaskList.jsx';
@@ -9,6 +9,7 @@ import { TriageStream } from '../panels/TriageStream.jsx';
 import { PeoplePanel } from '../panels/PeoplePanel.jsx';
 
 function ViewLink({ to }) {
+  const T = useTheme();
   const navigate = useNavigate();
   return (
     <button
@@ -24,7 +25,8 @@ function ViewLink({ to }) {
   );
 }
 
-export function TodayView({ panelFocus, cursors, accent, triageFilter, setTriageFilter, onTasksLoaded, onTriageLoaded, onPeopleLoaded }) {
+export function TodayView({ panelFocus, cursors, triageFilter, setTriageFilter, onTasksLoaded, onTriageLoaded, onPeopleLoaded }) {
+  const T = useTheme();
   return (
     <div style={{
       flex: 1, display: 'grid',
@@ -32,24 +34,24 @@ export function TodayView({ panelFocus, cursors, accent, triageFilter, setTriage
       gridTemplateRows: '1fr 1fr',
       gap: 1, background: T.border, overflow: 'hidden', minHeight: 0,
     }}>
-      <Panel title="schedule_today" hint="g c" right={<ViewLink to="/calendar" />} focused={panelFocus === 'schedule'} accent={accent} style={{ gridArea: '1 / 1 / 3 / 2' }}>
-        <Schedule accent={accent} />
+      <Panel title="schedule_today" hint="g c" right={<ViewLink to="/calendar" />} focused={panelFocus === 'schedule'} style={{ gridArea: '1 / 1 / 3 / 2' }}>
+        <Schedule />
       </Panel>
 
-      <Panel title="action_queue" hint="g a" right={<ViewLink to="/notes" />} focused={panelFocus === 'tasks'} accent={accent}>
-        <TaskList focused={panelFocus === 'tasks'} cursor={cursors.tasks} accent={accent} onLoaded={onTasksLoaded} />
+      <Panel title="action_queue" hint="g a" right={<ViewLink to="/notes" />} focused={panelFocus === 'tasks'}>
+        <TaskList focused={panelFocus === 'tasks'} cursor={cursors.tasks} onLoaded={onTasksLoaded} />
       </Panel>
 
-      <Panel title="triage" hint="g i" right={<ViewLink to="/triage" />} focused={panelFocus === 'triage'} accent={accent}>
-        <TriageStream focused={panelFocus === 'triage'} cursor={cursors.triage} accent={accent} filter={triageFilter} setFilter={setTriageFilter} compact onLoaded={onTriageLoaded} />
+      <Panel title="triage" hint="g i" right={<ViewLink to="/triage" />} focused={panelFocus === 'triage'}>
+        <TriageStream focused={panelFocus === 'triage'} cursor={cursors.triage} filter={triageFilter} setFilter={setTriageFilter} compact onLoaded={onTriageLoaded} />
       </Panel>
 
-      <Panel title="morning_brief" hint="g b" right={<ViewLink to="/brief" />} focused={panelFocus === 'brief'} accent={accent}>
-        <Brief accent={accent} />
+      <Panel title="morning_brief" hint="g b" right={<ViewLink to="/brief" />} focused={panelFocus === 'brief'}>
+        <Brief />
       </Panel>
 
-      <Panel title="people" hint="g p" right={<ViewLink to="/people" />} focused={panelFocus === 'people'} accent={accent}>
-        <PeoplePanel focused={panelFocus === 'people'} cursor={cursors.people} accent={accent} onLoaded={onPeopleLoaded} />
+      <Panel title="people" hint="g p" right={<ViewLink to="/people" />} focused={panelFocus === 'people'}>
+        <PeoplePanel focused={panelFocus === 'people'} cursor={cursors.people} onLoaded={onPeopleLoaded} />
       </Panel>
     </div>
   );
