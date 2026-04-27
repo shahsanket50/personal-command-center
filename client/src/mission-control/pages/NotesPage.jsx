@@ -54,7 +54,7 @@ function TaskRow({ task, onToggle, onDelete }) {
       <span style={{ flex: 1, fontSize: 13.5, color: task.status === 'Done' ? T.textGhost : T.text, textDecoration: task.status === 'Done' ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {task.title}
       </span>
-      {dueLabel && <span style={{ fontSize: 16, color: dueColor, flexShrink: 0 }}>{dueLabel}</span>}
+      {dueLabel && <span style={{ fontSize: 12, color: dueColor, flexShrink: 0 }}>{dueLabel}</span>}
       {hovered && (
         <button onClick={() => onDelete(task.id)} style={{ background: 'transparent', border: 'none', color: T.textGhost, cursor: 'pointer', fontSize: 15, flexShrink: 0, padding: 0, lineHeight: 1 }}>×</button>
       )}
@@ -182,7 +182,7 @@ export function NotesPage() {
       fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
     }}>
       {loadError && (
-        <div style={{ gridColumn: '1 / -1', padding: '6px 12px', fontSize: 15, color: T.danger, background: T.bg2, borderBottom: `1px solid ${T.border}` }}>
+        <div style={{ gridColumn: '1 / -1', padding: '6px 12px', fontSize: 13, color: T.danger, background: T.bg2, borderBottom: `1px solid ${T.border}` }}>
           {loadError}
         </div>
       )}
@@ -199,7 +199,7 @@ export function NotesPage() {
             width: '100%', height: '100%', background: T.bg1, color: T.text,
             border: 'none', outline: 'none', resize: 'none', padding: '10px 12px',
             fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
-            fontSize: 16, lineHeight: 1.6, boxSizing: 'border-box',
+            fontSize: 14, lineHeight: 1.6, boxSizing: 'border-box',
           }}
         />
       </Panel>

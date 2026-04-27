@@ -37,19 +37,19 @@ function EventRow({ ev, onNavigate }) {
       style={{
         padding: '2px 7px', background: isNow ? T.bg4 : T.bg3,
         borderLeft: `2px solid ${tagColor}`,
-        fontSize: 15, color: isPast ? T.textGhost : isNow ? T.textHi : T.text,
+        fontSize: 13, color: isPast ? T.textGhost : isNow ? T.textHi : T.text,
         borderRadius: 2, marginBottom: 2,
         display: 'flex', alignItems: 'center', gap: 6,
         textDecoration: isPast ? 'line-through' : 'none',
         cursor: 'pointer',
       }}
     >
-      <span style={{ color: T.textFaint, fontSize: 16, minWidth: 36 }}>{startLabel.replace(':', '')}</span>
+      <span style={{ color: T.textFaint, fontSize: 12, minWidth: 36 }}>{startLabel.replace(':', '')}</span>
       {isNow && <span style={{ color: '#10b981', animation: 'mc-pulse 1.6s infinite' }}>●</span>}
       <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {(ev.summary ?? '(no title)').toLowerCase()}
       </span>
-      {ev.attendeeCount > 0 && <span style={{ color: T.textGhost, fontSize: 16 }}>{ev.attendeeCount}p</span>}
+      {ev.attendeeCount > 0 && <span style={{ color: T.textGhost, fontSize: 12 }}>{ev.attendeeCount}p</span>}
     </div>
   );
 }
@@ -70,7 +70,7 @@ export function Schedule() {
   const HOURS = Array.from({ length: 11 }, (_, i) => 8 + i);
 
   return (
-    <div style={{ position: 'relative', padding: '4px 10px', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', fontSize: 15 }}>
+    <div style={{ position: 'relative', padding: '4px 10px', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', fontSize: 13 }}>
       {HOURS.map((h, i) => {
         const evs = events.filter((ev) => {
           const s = ev.start?.dateTime ?? ev.start?.date;
@@ -82,7 +82,7 @@ export function Schedule() {
             borderTop: i === 0 ? 'none' : `1px solid ${T.bg4}`,
             position: 'relative', alignItems: 'flex-start', paddingTop: 4,
           }}>
-            <div style={{ color: T.textGhost, minWidth: 32, fontSize: 14.5 }}>{String(h).padStart(2, '0')}:00</div>
+            <div style={{ color: T.textGhost, minWidth: 32, fontSize: 12.5 }}>{String(h).padStart(2, '0')}:00</div>
             <div style={{ flex: 1 }}>
               {evs.map((ev, j) => <EventRow key={ev.id ?? j} ev={ev} onNavigate={() => navigate('/calendar')} />)}
             </div>

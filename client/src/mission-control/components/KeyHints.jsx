@@ -16,7 +16,7 @@ export function KeyHints({ pivot, panelFocus }) {
     <div style={{
       display: 'flex', gap: 13, padding: '5px 14px',
       borderTop: `1px solid ${T.border}`, background: T.bg0,
-      fontSize: 16, color: T.textGhost,
+      fontSize: 12, color: T.textGhost,
       fontFamily: 'ui-monospace, Menlo, monospace',
       flexShrink: 0, alignItems: 'center',
     }}>

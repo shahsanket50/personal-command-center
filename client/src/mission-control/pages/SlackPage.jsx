@@ -32,7 +32,7 @@ function SectionCard({ section }) {
         <span style={{ color: T.textHi, fontSize: 13.5, fontWeight: 600 }}>{section.heading}</span>
         <span style={{ fontSize: 11, color: signal }}>●</span>
       </div>
-      <div style={{ fontSize: 15, color: T.textDim, lineHeight: 1.6 }}>
+      <div style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6 }}>
         {section.body.filter(l => l.trim() && !l.startsWith('Signal:')).map((line, i) => {
           if (line.startsWith('- [ ]')) return <div key={i} style={{ color: T.warn, marginBottom: 2 }}>□ {line.replace('- [ ]', '').trim()}</div>;
           if (line.startsWith('- ') || line.startsWith('* ')) return <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 2 }}><span style={{ color: T.textGhost }}>·</span><span>{line.slice(2)}</span></div>;
@@ -125,13 +125,13 @@ export function SlackPage() {
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
       <Panel title="slack_digest" right={headerRight}>
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
-          {error && <div style={{ color: T.danger, fontSize: 15, marginBottom: 10 }}>{error}</div>}
+          {error && <div style={{ color: T.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           {showChannels && channels.length > 0 && (
             <div style={{ background: T.bg1, border: `1px solid ${T.border}`, borderRadius: 5, padding: '10px 14px', marginBottom: 12 }}>
-              <div style={{ fontSize: 15, color: T.textDim, marginBottom: 8 }}>channel blacklist (checked = included in digest)</div>
+              <div style={{ fontSize: 13, color: T.textDim, marginBottom: 8 }}>channel blacklist (checked = included in digest)</div>
               <div style={{ maxHeight: 160, overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {channels.map(ch => (
-                  <label key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', fontSize: 15, color: ch.isBlacklisted ? T.textGhost : T.text }}>
+                  <label key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', fontSize: 13, color: ch.isBlacklisted ? T.textGhost : T.text }}>
                     <input type="checkbox" checked={!ch.isBlacklisted} onChange={() => toggleBlacklist(ch.id)} style={{ accentColor: T.accent }} />
                     {ch.type === 'dm' ? 'dm' : ch.type === 'private' ? 'prv' : '#'} {ch.name}
                   </label>
@@ -142,7 +142,7 @@ export function SlackPage() {
           {(isLoading || (isGenerating && sections.length === 0)) ? skeleton
             : sections.map((s) => <SectionCard key={s.heading} section={s} />)}
           {!isLoading && !isGenerating && sections.length === 0 && (
-            <div style={{ color: T.textGhost, fontSize: 15, textAlign: 'center', paddingTop: 32 }}>no slack activity in the last 24h</div>
+            <div style={{ color: T.textGhost, fontSize: 13, textAlign: 'center', paddingTop: 32 }}>no slack activity in the last 24h</div>
           )}
         </div>
       </Panel>

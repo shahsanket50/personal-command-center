@@ -107,7 +107,7 @@ export function TaskList({ focused, cursor, onLoaded }) {
             >
               {t.status === 'Done' && '✓'}
             </button>
-            <span style={{ color: dueColor, minWidth: 56, fontWeight: 600, fontSize: 16, flexShrink: 0 }}>
+            <span style={{ color: dueColor, minWidth: 56, fontWeight: 600, fontSize: 12, flexShrink: 0 }}>
               {due}
             </span>
             <span
@@ -125,7 +125,7 @@ export function TaskList({ focused, cursor, onLoaded }) {
                 onClick={() => handleDelete(t)}
                 style={{
                   flexShrink: 0, background: 'transparent', border: 'none',
-                  color: T.textGhost, cursor: 'pointer', fontSize: 15, padding: '0 2px',
+                  color: T.textGhost, cursor: 'pointer', fontSize: 13, padding: '0 2px',
                 }}
               >
                 ×

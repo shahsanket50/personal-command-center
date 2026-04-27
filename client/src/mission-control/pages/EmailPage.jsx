@@ -25,7 +25,7 @@ function SectionCard({ section }) {
   return (
     <div style={{ background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 5, padding: '12px 14px', marginBottom: 10 }}>
       <div style={{ fontSize: 13.5, fontWeight: 600, color: T.textHi, marginBottom: 8 }}>{label} {section.heading}</div>
-      <div style={{ fontSize: 15, color: T.textDim, lineHeight: 1.6 }}>
+      <div style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6 }}>
         {section.body.filter(l => l.trim()).map((line, i) => {
           if (line.startsWith('- [ ]')) return <div key={i} style={{ color: T.warn, marginBottom: 2 }}>□ {line.replace('- [ ]', '').trim()}</div>;
           if (line.startsWith('- ') || line.startsWith('* ')) return <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 2 }}><span style={{ color: T.textGhost }}>·</span><span>{line.slice(2)}</span></div>;
@@ -129,11 +129,11 @@ export function EmailPage() {
       <style>{`@keyframes mc-skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
       <Panel title="email_triage" right={headerRight}>
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
-          {error && <div style={{ color: T.danger, fontSize: 15, marginBottom: 10 }}>{error}</div>}
+          {error && <div style={{ color: T.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           {(isLoading || (isGenerating && sections.length === 0)) ? skeleton
             : sections.map(s => <SectionCard key={s.heading} section={s} />)}
           {!isLoading && !isGenerating && sections.length === 0 && !error && (
-            <div style={{ color: T.textGhost, fontSize: 15, textAlign: 'center', paddingTop: 32 }}>no unread emails</div>
+            <div style={{ color: T.textGhost, fontSize: 13, textAlign: 'center', paddingTop: 32 }}>no unread emails</div>
           )}
         </div>
       </Panel>

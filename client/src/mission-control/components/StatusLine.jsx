@@ -33,7 +33,7 @@ export function StatusLine() {
     <div style={{
       display: 'flex', gap: 18, padding: '4px 14px', alignItems: 'center',
       fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
-      fontSize: 14.5, color: T.textFaint, background: T.bg0,
+      fontSize: 12.5, color: T.textFaint, background: T.bg0,
       borderBottom: `1px solid ${T.border}`, flexShrink: 0, whiteSpace: 'nowrap',
     }}>
       <span style={{ color: T.accent }}>● connected</span>

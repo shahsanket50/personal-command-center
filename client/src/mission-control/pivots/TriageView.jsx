@@ -27,11 +27,11 @@ const ICONS = { slack: SlackIcon, email: MailIcon, cal: CalIcon };
 
 function FocusDetail({ item }) {
   const T = useTheme();
-  if (!item) return <div style={{ padding: '32px 18px', color: T.textGhost, fontSize: 16, fontFamily: 'ui-monospace, Menlo, monospace' }}>select an item with j/k</div>;
+  if (!item) return <div style={{ padding: '32px 18px', color: T.textGhost, fontSize: 14, fontFamily: 'ui-monospace, Menlo, monospace' }}>select an item with j/k</div>;
   const Icon = ICONS[item.kind] ?? MailIcon;
   return (
     <div style={{ padding: '14px 18px', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14.5, color: T.textDim }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: T.textDim }}>
         <Icon />
         {item.kind}{item.channel ? ` · ${item.channel}` : ''}
         {item.urgent && <span style={{ color: T.warn, marginLeft: 6 }}>· URGENT · {item.age}</span>}
@@ -76,11 +76,11 @@ export function TriageView({ panelFocus, cursors, filter, setFilter, onTriageLoa
         <FocusDetail item={focusedItem} />
       </Panel>
       <Panel title="ambient" focused={false}>
-        <div style={{ padding: 11, fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 15, color: T.textDim }}>
+        <div style={{ padding: 11, fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 13, color: T.textDim }}>
           <div style={{ color: T.accent, fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em' }}>URGENT</div>
           <div style={{ marginTop: 6 }}>
             {items.filter(i => i.urgent).slice(0, 5).map(i => (
-              <div key={i.id} style={{ display: 'flex', gap: 6, padding: '2px 0', fontSize: 14.5 }}>
+              <div key={i.id} style={{ display: 'flex', gap: 6, padding: '2px 0', fontSize: 12.5 }}>
                 <span style={{ color: T.textGhost, minWidth: 36 }}>{i.age}</span>
                 <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.from}</span>
               </div>

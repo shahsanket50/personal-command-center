@@ -28,11 +28,11 @@ export function PeoplePanel({ focused, cursor, onLoaded, onSelect }) {
   }, []);
 
   if (people.length === 0) {
-    return <div style={{ padding: '18px 12px', color: T.textGhost, fontSize: 15, fontFamily: 'ui-monospace, Menlo, monospace' }}>no people in DB.</div>;
+    return <div style={{ padding: '18px 12px', color: T.textGhost, fontSize: 13, fontFamily: 'ui-monospace, Menlo, monospace' }}>no people in DB.</div>;
   }
 
   return (
-    <div style={{ fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', fontSize: 15 }}>
+    <div style={{ fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', fontSize: 13 }}>
       {people.map((p, i) => {
         const isCursor = focused && cursor === i;
         return (
@@ -47,14 +47,14 @@ export function PeoplePanel({ focused, cursor, onLoaded, onSelect }) {
               width: 24, height: 24, borderRadius: 12,
               background: p.ooo ? '#92400e' : T.bg4,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, fontWeight: 600, color: p.ooo ? '#fef3c7' : T.text, flexShrink: 0,
+              fontSize: 12, fontWeight: 600, color: p.ooo ? '#fef3c7' : T.text, flexShrink: 0,
             }}>{p.initials}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: T.text, fontSize: 15, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ color: T.text, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
                 {p.name}
                 {p.ooo && <span style={{ color: T.warn, fontSize: 11.5 }}>· OOO</span>}
               </div>
-              <div style={{ color: T.textGhost, fontSize: 16 }}>{p.role.split(' · ')[0]} · {last1on1Label(p.last1on1)}</div>
+              <div style={{ color: T.textGhost, fontSize: 12 }}>{p.role.split(' · ')[0]} · {last1on1Label(p.last1on1)}</div>
             </div>
           </div>
         );

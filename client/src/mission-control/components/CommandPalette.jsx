@@ -79,7 +79,7 @@ export function CommandPalette({ open, onClose, onCommand }) {
               fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
             }}
           />
-          <kbd style={{ fontSize: 16, padding: '2px 6px', borderRadius: 3, background: T.bg0, color: T.textDim, border: `1px solid ${T.border}`, fontFamily: 'ui-monospace, Menlo, monospace' }}>esc</kbd>
+          <kbd style={{ fontSize: 12, padding: '2px 6px', borderRadius: 3, background: T.bg0, color: T.textDim, border: `1px solid ${T.border}`, fontFamily: 'ui-monospace, Menlo, monospace' }}>esc</kbd>
         </div>
 
         <div className="mc-scroll" style={{ padding: 6, maxHeight: 320, overflow: 'auto' }}>
@@ -93,14 +93,14 @@ export function CommandPalette({ open, onClose, onCommand }) {
               borderLeft: i === idx ? `2px solid ${T.accent}` : '2px solid transparent',
               cursor: 'pointer',
             }}>
-              <code style={{ fontSize: 16, color: i === idx ? T.accent : T.textDim, fontWeight: 600, minWidth: 70, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.k}</code>
+              <code style={{ fontSize: 14, color: i === idx ? T.accent : T.textDim, fontWeight: 600, minWidth: 70, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.k}</code>
               <span style={{ fontSize: 14.5, flex: 1, color: i === idx ? T.textHi : T.text }}>{c.d}</span>
-              <kbd style={{ fontSize: 16, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.shortcut}</kbd>
+              <kbd style={{ fontSize: 12, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.shortcut}</kbd>
             </div>
           ))}
         </div>
 
-        <div style={{ padding: '7px 14px', fontSize: 16, borderTop: `1px solid ${T.border}`, background: T.bg0, color: status ? T.accent : T.textGhost, fontFamily: 'ui-monospace, Menlo, monospace', display: 'flex', gap: 14 }}>
+        <div style={{ padding: '7px 14px', fontSize: 12, borderTop: `1px solid ${T.border}`, background: T.bg0, color: status ? T.accent : T.textGhost, fontFamily: 'ui-monospace, Menlo, monospace', display: 'flex', gap: 14 }}>
           {status
             ? <span>{status}</span>
             : <><span>up/down pick</span><span>enter run</span><span>esc close</span></>}

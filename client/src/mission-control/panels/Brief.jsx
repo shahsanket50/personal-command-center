@@ -23,20 +23,20 @@ function BriefLine({ line }) {
   if (!line.trim()) return <div style={{ height: 6 }} />;
 
   if (line.startsWith('# ')) {
-    return <div style={{ color: T.accent, fontWeight: 700, fontSize: 16 }}>{line.slice(2)}</div>;
+    return <div style={{ color: T.accent, fontWeight: 700, fontSize: 14 }}>{line.slice(2)}</div>;
   }
   if (line.startsWith('## ')) {
-    return <div style={{ color: T.accent, marginTop: 10, fontSize: 15 }}>{line.slice(3)}</div>;
+    return <div style={{ color: T.accent, marginTop: 10, fontSize: 13 }}>{line.slice(3)}</div>;
   }
   if (line.startsWith('- ') || line.startsWith('→ ')) {
     return (
-      <div style={{ color: T.textDim, display: 'flex', gap: 6, fontSize: 15 }}>
+      <div style={{ color: T.textDim, display: 'flex', gap: 6, fontSize: 13 }}>
         <span style={{ color: T.textGhost }}>→</span>
         <BoldText text={line.slice(2)} />
       </div>
     );
   }
-  return <div style={{ color: T.textDim, fontSize: 15 }}><BoldText text={line} /></div>;
+  return <div style={{ color: T.textDim, fontSize: 13 }}><BoldText text={line} /></div>;
 }
 
 export function Brief() {

@@ -59,7 +59,7 @@ export function CalendarPage() {
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
       <Panel title="calendar" right={headerRight}>
         {connectWarning && (
-          <div style={{ padding: '6px 12px', background: T.bg3, color: T.warn, fontSize: 14.5, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
+          <div style={{ padding: '6px 12px', background: T.bg3, color: T.warn, fontSize: 12.5, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
             {status.google === false && 'Google Calendar disconnected — reconnect in /settings. '}
             {status.microsoft === false && 'Microsoft Calendar disconnected — reconnect in /settings.'}
           </div>
@@ -76,7 +76,7 @@ export function CalendarPage() {
             });
             return (
               <div key={h} style={{ display: 'flex', gap: 10, minHeight: 52, borderTop: i === 0 ? 'none' : `1px solid ${T.bg4}`, paddingTop: 4, position: 'relative', alignItems: 'flex-start' }}>
-                <div style={{ color: T.textGhost, minWidth: 42, fontSize: 14.5 }}>{String(h).padStart(2,'0')}:00</div>
+                <div style={{ color: T.textGhost, minWidth: 42, fontSize: 12.5 }}>{String(h).padStart(2,'0')}:00</div>
                 <div style={{ flex: 1 }}>
                   {hourEvents.map((ev, j) => {
                     const now = new Date();
@@ -91,17 +91,17 @@ export function CalendarPage() {
                       <div
                         key={ev.id ?? j}
                         onClick={() => setExpanded(isExpanded ? null : (ev.id ?? j))}
-                        style={{ padding: '3px 8px', background: isNow ? T.bg4 : T.bg3, borderLeft: `2px solid ${tagColor}`, fontSize: 15, color: isPast ? T.textGhost : isNow ? T.textHi : T.text, borderRadius: 2, marginBottom: 3, cursor: 'pointer', textDecoration: isPast ? 'line-through' : 'none' }}
+                        style={{ padding: '3px 8px', background: isNow ? T.bg4 : T.bg3, borderLeft: `2px solid ${tagColor}`, fontSize: 13, color: isPast ? T.textGhost : isNow ? T.textHi : T.text, borderRadius: 2, marginBottom: 3, cursor: 'pointer', textDecoration: isPast ? 'line-through' : 'none' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ color: T.textGhost, fontSize: 16, minWidth: 36 }}>{startLabel}</span>
+                          <span style={{ color: T.textGhost, fontSize: 12, minWidth: 36 }}>{startLabel}</span>
                           {isNow && <span style={{ color: '#10b981' }}>●</span>}
                           <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(ev.title ?? '(no title)').toLowerCase()}</span>
-                          {ev.attendeeCount > 0 && <span style={{ color: T.textGhost, fontSize: 16 }}>{ev.attendeeCount}p</span>}
+                          {ev.attendeeCount > 0 && <span style={{ color: T.textGhost, fontSize: 12 }}>{ev.attendeeCount}p</span>}
                           <span style={{ color: T.textGhost, fontSize: 11, flexShrink: 0 }}>{ev.source}</span>
                         </div>
                         {isExpanded && (
-                          <div style={{ marginTop: 4, color: T.textDim, fontSize: 14.5, lineHeight: 1.5 }}>
+                          <div style={{ marginTop: 4, color: T.textDim, fontSize: 12.5, lineHeight: 1.5 }}>
                             {ev.location && <div>loc: {ev.location}</div>}
                             {ev.attendeeCount > 0 && <div>{ev.attendeeCount} attendees</div>}
                             {start && end && <div>{startLabel} – {end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</div>}

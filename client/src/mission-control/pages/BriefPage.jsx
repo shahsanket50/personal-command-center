@@ -24,7 +24,7 @@ function SectionCard({ section }) {
   const icon = SECTION_ICONS[section.heading.toLowerCase()] ?? '◆';
   return (
     <div style={{ background: T.bg1, border: `1px solid ${T.border}`, borderRadius: 5, padding: '14px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontSize: 16, color: T.textHi, fontWeight: 600 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontSize: 14, color: T.textHi, fontWeight: 600 }}>
         <span style={{ color: T.accent }}>{icon}</span>{section.heading}
       </div>
       <div style={{ fontSize: 13.5, color: T.text, lineHeight: 1.7 }}>
@@ -113,7 +113,7 @@ export function BriefPage() {
         }
       >
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
-          {error && <div style={{ color: T.danger, fontSize: 15, marginBottom: 12 }}>{error}</div>}
+          {error && <div style={{ color: T.danger, fontSize: 13, marginBottom: 12 }}>{error}</div>}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {isGenerating && sections.length === 0 ? skeleton : sections.map((s) => <SectionCard key={s.heading} section={s} />)}
           </div>
