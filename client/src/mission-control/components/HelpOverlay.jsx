@@ -41,18 +41,18 @@ export function HelpOverlay({ open, onClose }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
           <span style={{ color: T.accent }}>◆</span>
-          <h2 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: T.textHi }}>keyboard reference</h2>
+          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: T.textHi }}>keyboard reference</h2>
           <span style={{ flex: 1 }} />
-          <kbd style={{ fontSize: 10, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim }}>esc</kbd>
+          <kbd style={{ fontSize: 16, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim }}>esc</kbd>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 22 }}>
           {GROUPS.map((g) => (
             <div key={g.title}>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent, marginBottom: 8 }}>{g.title}</div>
+              <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent, marginBottom: 8 }}>{g.title}</div>
               {g.items.map(([k, d]) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11.5 }}>
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13.5 }}>
                   <span style={{ color: T.text }}>{d}</span>
-                  <kbd style={{ fontSize: 10.5, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim }}>{k}</kbd>
+                  <kbd style={{ fontSize: 14.5, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim }}>{k}</kbd>
                 </div>
               ))}
             </div>

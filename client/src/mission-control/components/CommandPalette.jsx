@@ -75,15 +75,15 @@ export function CommandPalette({ open, onClose, onCommand }) {
             placeholder="type a command, or ask Claude…"
             style={{
               flex: 1, border: 'none', outline: 'none', background: 'transparent',
-              fontSize: 14, color: T.textHi,
+              fontSize: 16, color: T.textHi,
               fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
             }}
           />
-          <kbd style={{ fontSize: 10, padding: '2px 6px', borderRadius: 3, background: T.bg0, color: T.textDim, border: `1px solid ${T.border}`, fontFamily: 'ui-monospace, Menlo, monospace' }}>esc</kbd>
+          <kbd style={{ fontSize: 16, padding: '2px 6px', borderRadius: 3, background: T.bg0, color: T.textDim, border: `1px solid ${T.border}`, fontFamily: 'ui-monospace, Menlo, monospace' }}>esc</kbd>
         </div>
 
         <div className="mc-scroll" style={{ padding: 6, maxHeight: 320, overflow: 'auto' }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.textFaint, padding: '8px 12px 4px', fontFamily: 'ui-monospace, Menlo, monospace' }}>
+          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.textFaint, padding: '8px 12px 4px', fontFamily: 'ui-monospace, Menlo, monospace' }}>
             commands · {filtered.length}
           </div>
           {filtered.map((c, i) => (
@@ -93,14 +93,14 @@ export function CommandPalette({ open, onClose, onCommand }) {
               borderLeft: i === idx ? `2px solid ${T.accent}` : '2px solid transparent',
               cursor: 'pointer',
             }}>
-              <code style={{ fontSize: 12, color: i === idx ? T.accent : T.textDim, fontWeight: 600, minWidth: 70, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.k}</code>
-              <span style={{ fontSize: 12.5, flex: 1, color: i === idx ? T.textHi : T.text }}>{c.d}</span>
-              <kbd style={{ fontSize: 10, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.shortcut}</kbd>
+              <code style={{ fontSize: 16, color: i === idx ? T.accent : T.textDim, fontWeight: 600, minWidth: 70, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.k}</code>
+              <span style={{ fontSize: 14.5, flex: 1, color: i === idx ? T.textHi : T.text }}>{c.d}</span>
+              <kbd style={{ fontSize: 16, padding: '1px 5px', borderRadius: 3, background: T.bg0, border: `1px solid ${T.border}`, color: T.textDim, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.shortcut}</kbd>
             </div>
           ))}
         </div>
 
-        <div style={{ padding: '7px 14px', fontSize: 10, borderTop: `1px solid ${T.border}`, background: T.bg0, color: status ? T.accent : T.textGhost, fontFamily: 'ui-monospace, Menlo, monospace', display: 'flex', gap: 14 }}>
+        <div style={{ padding: '7px 14px', fontSize: 16, borderTop: `1px solid ${T.border}`, background: T.bg0, color: status ? T.accent : T.textGhost, fontFamily: 'ui-monospace, Menlo, monospace', display: 'flex', gap: 14 }}>
           {status
             ? <span>{status}</span>
             : <><span>up/down pick</span><span>enter run</span><span>esc close</span></>}

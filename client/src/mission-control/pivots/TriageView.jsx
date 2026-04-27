@@ -11,11 +11,11 @@ function ActionBtn({ children, primary, hot }) {
       background: primary ? T.accent : T.bg3,
       color: primary ? T.bg0 : T.text,
       border: primary ? 'none' : `1px solid ${T.border}`,
-      borderRadius: 4, cursor: 'pointer', fontSize: 11.5, fontWeight: 600,
+      borderRadius: 4, cursor: 'pointer', fontSize: 13.5, fontWeight: 600,
       fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
     }}>
       {children}
-      {hot && <kbd style={{ fontSize: 9.5, padding: '1px 4px', borderRadius: 3, background: T.bg0, color: T.textDim, border: `1px solid ${T.border}` }}>{hot}</kbd>}
+      {hot && <kbd style={{ fontSize: 11.5, padding: '1px 4px', borderRadius: 3, background: T.bg0, color: T.textDim, border: `1px solid ${T.border}` }}>{hot}</kbd>}
     </button>
   );
 }
@@ -27,18 +27,18 @@ const ICONS = { slack: SlackIcon, email: MailIcon, cal: CalIcon };
 
 function FocusDetail({ item }) {
   const T = useTheme();
-  if (!item) return <div style={{ padding: '32px 18px', color: T.textGhost, fontSize: 12, fontFamily: 'ui-monospace, Menlo, monospace' }}>select an item with j/k</div>;
+  if (!item) return <div style={{ padding: '32px 18px', color: T.textGhost, fontSize: 16, fontFamily: 'ui-monospace, Menlo, monospace' }}>select an item with j/k</div>;
   const Icon = ICONS[item.kind] ?? MailIcon;
   return (
     <div style={{ padding: '14px 18px', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 10.5, color: T.textDim }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14.5, color: T.textDim }}>
         <Icon />
         {item.kind}{item.channel ? ` · ${item.channel}` : ''}
         {item.urgent && <span style={{ color: T.warn, marginLeft: 6 }}>· URGENT · {item.age}</span>}
       </div>
       <div style={{ fontSize: 18, color: T.textHi, fontWeight: 600, marginTop: 8 }}>{item.from}</div>
-      {item.subject && <div style={{ fontSize: 11.5, color: T.textDim, marginTop: 2 }}>{item.subject}</div>}
-      <div style={{ marginTop: 14, padding: '12px 14px', background: T.bg3, borderLeft: `2px solid ${T.accent}`, fontSize: 12.5, color: T.text, lineHeight: 1.6 }}>
+      {item.subject && <div style={{ fontSize: 13.5, color: T.textDim, marginTop: 2 }}>{item.subject}</div>}
+      <div style={{ marginTop: 14, padding: '12px 14px', background: T.bg3, borderLeft: `2px solid ${T.accent}`, fontSize: 14.5, color: T.text, lineHeight: 1.6 }}>
         {item.preview}
       </div>
       <div style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
@@ -76,11 +76,11 @@ export function TriageView({ panelFocus, cursors, filter, setFilter, onTriageLoa
         <FocusDetail item={focusedItem} />
       </Panel>
       <Panel title="ambient" focused={false}>
-        <div style={{ padding: 11, fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11, color: T.textDim }}>
-          <div style={{ color: T.accent, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em' }}>URGENT</div>
+        <div style={{ padding: 11, fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 15, color: T.textDim }}>
+          <div style={{ color: T.accent, fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em' }}>URGENT</div>
           <div style={{ marginTop: 6 }}>
             {items.filter(i => i.urgent).slice(0, 5).map(i => (
-              <div key={i.id} style={{ display: 'flex', gap: 6, padding: '2px 0', fontSize: 10.5 }}>
+              <div key={i.id} style={{ display: 'flex', gap: 6, padding: '2px 0', fontSize: 14.5 }}>
                 <span style={{ color: T.textGhost, minWidth: 36 }}>{i.age}</span>
                 <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i.from}</span>
               </div>

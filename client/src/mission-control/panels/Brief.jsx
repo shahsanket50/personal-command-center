@@ -23,20 +23,20 @@ function BriefLine({ line }) {
   if (!line.trim()) return <div style={{ height: 6 }} />;
 
   if (line.startsWith('# ')) {
-    return <div style={{ color: T.accent, fontWeight: 700, fontSize: 12 }}>{line.slice(2)}</div>;
+    return <div style={{ color: T.accent, fontWeight: 700, fontSize: 16 }}>{line.slice(2)}</div>;
   }
   if (line.startsWith('## ')) {
-    return <div style={{ color: T.accent, marginTop: 10, fontSize: 11 }}>{line.slice(3)}</div>;
+    return <div style={{ color: T.accent, marginTop: 10, fontSize: 15 }}>{line.slice(3)}</div>;
   }
   if (line.startsWith('- ') || line.startsWith('→ ')) {
     return (
-      <div style={{ color: T.textDim, display: 'flex', gap: 6, fontSize: 11 }}>
+      <div style={{ color: T.textDim, display: 'flex', gap: 6, fontSize: 15 }}>
         <span style={{ color: T.textGhost }}>→</span>
         <BoldText text={line.slice(2)} />
       </div>
     );
   }
-  return <div style={{ color: T.textDim, fontSize: 11 }}><BoldText text={line} /></div>;
+  return <div style={{ color: T.textDim, fontSize: 15 }}><BoldText text={line} /></div>;
 }
 
 export function Brief() {
@@ -76,19 +76,19 @@ export function Brief() {
 
   if (content === null) {
     return (
-      <div style={{ padding: '18px 12px', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11.5 }}>
+      <div style={{ padding: '18px 12px', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 13.5 }}>
         <div style={{ color: T.textGhost }}>no brief for today.</div>
         <button onClick={generate} style={{
           marginTop: 10, padding: '4px 10px', background: T.accent, color: T.bg0,
           border: 'none', borderRadius: 4, cursor: 'pointer',
-          fontSize: 11.5, fontWeight: 600, fontFamily: 'inherit',
+          fontSize: 13.5, fontWeight: 600, fontFamily: 'inherit',
         }}>generate</button>
       </div>
     );
   }
 
   return (
-    <div style={{ fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', fontSize: 11.5, lineHeight: 1.7, padding: '8px 12px' }}>
+    <div style={{ fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', fontSize: 13.5, lineHeight: 1.7, padding: '8px 12px' }}>
       {content.split('\n').map((line, i) => <BriefLine key={i} line={line} />)}
       {generating && <span style={{ color: T.accent, animation: 'mc-blink 1s infinite' }}>|</span>}
     </div>

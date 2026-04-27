@@ -17,7 +17,7 @@ function ViewLink({ to }) {
       onMouseDown={e => e.preventDefault()}
       style={{
         background: 'transparent', border: 'none', cursor: 'pointer',
-        color: T.textDim, fontSize: 9.5, fontFamily: 'inherit', padding: 0,
+        color: T.textDim, fontSize: 11.5, fontFamily: 'inherit', padding: 0,
       }}
     >
       view →

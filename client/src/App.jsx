@@ -169,7 +169,7 @@ function AppInner() {
           position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)',
           padding: '8px 14px', background: T.bg2, border: `1px solid ${T.accent}`,
           borderRadius: 6, fontFamily: 'ui-monospace, Menlo, monospace',
-          fontSize: 12, color: T.textHi, zIndex: 50,
+          fontSize: 16, color: T.textHi, zIndex: 50,
         }}>
           <span style={{ color: T.accent }}>g</span> + <span style={{ color: T.warn }}>t</span>oday · <span style={{ color: T.warn }}>i</span>nbox · <span style={{ color: T.warn }}>p</span>eople
         </div>

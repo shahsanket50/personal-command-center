@@ -70,14 +70,14 @@ export function TaskList({ focused, cursor, onLoaded }) {
 
   if (tasks.length === 0) {
     return (
-      <div style={{ padding: '32px 16px', textAlign: 'center', color: T.textGhost, fontSize: 11.5, fontFamily: 'ui-monospace, Menlo, monospace' }}>
+      <div style={{ padding: '32px 16px', textAlign: 'center', color: T.textGhost, fontSize: 13.5, fontFamily: 'ui-monospace, Menlo, monospace' }}>
         no tasks — inbox zero.
       </div>
     );
   }
 
   return (
-    <div style={{ fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', fontSize: 11.5, padding: '6px 4px' }}>
+    <div style={{ fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', fontSize: 13.5, padding: '6px 4px' }}>
       {tasks.map((t, i) => {
         const due = dueLabel(t.dueDate);
         const dueColor = due === 'overdue' ? T.danger : due === 'today' ? T.warn : due === 'no date' ? T.textFaint : T.textDim;
@@ -102,12 +102,12 @@ export function TaskList({ focused, cursor, onLoaded }) {
                 border: `1px solid ${T.textGhost}`, borderRadius: 2,
                 background: 'transparent', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: T.textGhost, fontSize: 9,
+                color: T.textGhost, fontSize: 11,
               }}
             >
               {t.status === 'Done' && '✓'}
             </button>
-            <span style={{ color: dueColor, minWidth: 56, fontWeight: 600, fontSize: 10, flexShrink: 0 }}>
+            <span style={{ color: dueColor, minWidth: 56, fontWeight: 600, fontSize: 16, flexShrink: 0 }}>
               {due}
             </span>
             <span
@@ -125,7 +125,7 @@ export function TaskList({ focused, cursor, onLoaded }) {
                 onClick={() => handleDelete(t)}
                 style={{
                   flexShrink: 0, background: 'transparent', border: 'none',
-                  color: T.textGhost, cursor: 'pointer', fontSize: 11, padding: '0 2px',
+                  color: T.textGhost, cursor: 'pointer', fontSize: 15, padding: '0 2px',
                 }}
               >
                 ×

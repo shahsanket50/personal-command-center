@@ -6,7 +6,7 @@ export function KeyHints({ pivot, panelFocus }) {
 
   const K = ({ children }) => (
     <kbd style={{
-      fontSize: 9.5, padding: '1px 4px', borderRadius: 3,
+      fontSize: 11.5, padding: '1px 4px', borderRadius: 3,
       background: T.bg3, border: `1px solid ${T.border}`,
       color: T.textDim, fontFamily: 'ui-monospace, Menlo, monospace',
     }}>{children}</kbd>
@@ -16,7 +16,7 @@ export function KeyHints({ pivot, panelFocus }) {
     <div style={{
       display: 'flex', gap: 13, padding: '5px 14px',
       borderTop: `1px solid ${T.border}`, background: T.bg0,
-      fontSize: 10, color: T.textGhost,
+      fontSize: 16, color: T.textGhost,
       fontFamily: 'ui-monospace, Menlo, monospace',
       flexShrink: 0, alignItems: 'center',
     }}>

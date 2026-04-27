@@ -29,11 +29,11 @@ function FilterChips({ active, setActive, counts }) {
             background: on ? T.bg4 : 'transparent',
             color: on ? T.accent : T.textDim,
             border: `1px solid ${on ? T.accent + '66' : T.border}`,
-            borderRadius: 10, cursor: 'pointer', fontSize: 10.5, fontWeight: 500, fontFamily: 'inherit', outline: 'none',
+            borderRadius: 10, cursor: 'pointer', fontSize: 14.5, fontWeight: 500, fontFamily: 'inherit', outline: 'none',
           }}>
             {c.dot && <span style={{ width: 5, height: 5, borderRadius: 3, background: c.dot, display: 'inline-block' }} />}
             {c.label}
-            <span style={{ color: on ? T.accent : T.textGhost, fontSize: 9.5 }}>{c.n}</span>
+            <span style={{ color: on ? T.accent : T.textGhost, fontSize: 11.5 }}>{c.n}</span>
           </button>
         );
       })}
@@ -74,7 +74,7 @@ export function TriageStream({ focused, cursor, filter, setFilter, compact, onLo
 
   const visibleFlat = sections.flatMap((s) => collapsed.has(s.lane ?? '') ? [] : s.items);
 
-  if (loading) return <div style={{ padding: '18px 12px', color: T.textGhost, fontSize: 11, fontFamily: 'ui-monospace, Menlo, monospace' }}>loading triage…</div>;
+  if (loading) return <div style={{ padding: '18px 12px', color: T.textGhost, fontSize: 15, fontFamily: 'ui-monospace, Menlo, monospace' }}>loading triage…</div>;
 
   const toggleCollapse = (lane) => setCollapsed((prev) => {
     const next = new Set(prev);
@@ -85,7 +85,7 @@ export function TriageStream({ focused, cursor, filter, setFilter, compact, onLo
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1 }}>
       {!compact && <FilterChips active={filter} setActive={setFilter} counts={counts} />}
-      <div className="mc-scroll" style={{ flex: 1, overflow: 'auto', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11 }}>
+      <div className="mc-scroll" style={{ flex: 1, overflow: 'auto', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 15 }}>
         {sections.map((sec, si) => {
           const isCollapsed = collapsed.has(sec.lane ?? '');
           return (
@@ -93,7 +93,7 @@ export function TriageStream({ focused, cursor, filter, setFilter, compact, onLo
               {sec.lane && (
                 <div onClick={() => toggleCollapse(sec.lane)} style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '7px 11px 4px',
-                  fontSize: 9.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase',
+                  fontSize: 11.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase',
                   color: T.textFaint, borderTop: si === 0 ? 'none' : `1px solid ${T.bg2}`, cursor: 'pointer',
                 }}>
                   <span style={{ width: 5, height: 5, borderRadius: 3, background: LANE_META[sec.lane]?.color ?? T.textGhost }} />
@@ -104,7 +104,7 @@ export function TriageStream({ focused, cursor, filter, setFilter, compact, onLo
                 </div>
               )}
               {isCollapsed
-                ? <div onClick={() => toggleCollapse(sec.lane)} style={{ padding: '4px 11px', fontSize: 10, color: T.textGhost, cursor: 'pointer', borderBottom: `1px solid ${T.bg2}` }}>show {sec.items.length} {LANE_META[sec.lane]?.label}</div>
+                ? <div onClick={() => toggleCollapse(sec.lane)} style={{ padding: '4px 11px', fontSize: 16, color: T.textGhost, cursor: 'pointer', borderBottom: `1px solid ${T.bg2}` }}>show {sec.items.length} {LANE_META[sec.lane]?.label}</div>
                 : sec.items.map((it) => {
                     const flatIdx = visibleFlat.indexOf(it);
                     const isCursor = focused && cursor === flatIdx;
@@ -122,9 +122,9 @@ export function TriageStream({ focused, cursor, filter, setFilter, compact, onLo
                           <span style={{ color: it.urgent ? T.warn : T.text, fontWeight: it.urgent ? 600 : 400 }}>{it.from}</span>
                           {it.channel && <span style={{ color: T.textFaint }}>{it.channel}</span>}
                           {it.urgent && <AlertIcon />}
-                          <span style={{ color: T.textGhost, marginLeft: 'auto', fontSize: 10 }}>{it.age}</span>
+                          <span style={{ color: T.textGhost, marginLeft: 'auto', fontSize: 16 }}>{it.age}</span>
                         </div>
-                        <div style={{ color: isCursor ? T.text : T.textDim, marginTop: 2, fontSize: 10.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 17 }}>
+                        <div style={{ color: isCursor ? T.text : T.textDim, marginTop: 2, fontSize: 14.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 17 }}>
                           {it.subject ? <span style={{ color: T.text, fontWeight: 600 }}>{it.subject}{' '}</span> : null}
                           {it.preview}
                         </div>
@@ -135,7 +135,7 @@ export function TriageStream({ focused, cursor, filter, setFilter, compact, onLo
           );
         })}
         {visibleFlat.length === 0 && !loading && (
-          <div style={{ padding: '32px 16px', textAlign: 'center', color: T.textGhost, fontSize: 11.5 }}>
+          <div style={{ padding: '32px 16px', textAlign: 'center', color: T.textGhost, fontSize: 13.5 }}>
             {filter === 'all' ? 'inbox zero.' : `no ${filter} items.`}
           </div>
         )}

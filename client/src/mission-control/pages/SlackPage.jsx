@@ -29,10 +29,10 @@ function SectionCard({ section }) {
   return (
     <div style={{ background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 5, padding: '12px 14px', marginBottom: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <span style={{ color: T.textHi, fontSize: 11.5, fontWeight: 600 }}>{section.heading}</span>
-        <span style={{ fontSize: 9, color: signal }}>●</span>
+        <span style={{ color: T.textHi, fontSize: 13.5, fontWeight: 600 }}>{section.heading}</span>
+        <span style={{ fontSize: 11, color: signal }}>●</span>
       </div>
-      <div style={{ fontSize: 11, color: T.textDim, lineHeight: 1.6 }}>
+      <div style={{ fontSize: 15, color: T.textDim, lineHeight: 1.6 }}>
         {section.body.filter(l => l.trim() && !l.startsWith('Signal:')).map((line, i) => {
           if (line.startsWith('- [ ]')) return <div key={i} style={{ color: T.warn, marginBottom: 2 }}>□ {line.replace('- [ ]', '').trim()}</div>;
           if (line.startsWith('- ') || line.startsWith('* ')) return <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 2 }}><span style={{ color: T.textGhost }}>·</span><span>{line.slice(2)}</span></div>;
@@ -46,7 +46,7 @@ function SectionCard({ section }) {
 
 export function SlackPage() {
   const T = useTheme();
-  const linkBtn = { background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 9.5, fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', padding: 0 };
+  const linkBtn = { background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 11.5, fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace', padding: 0 };
   const [sections, setSections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -114,7 +114,7 @@ export function SlackPage() {
   ));
 
   const headerRight = (
-    <div style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 9.5 }}>
+    <div style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 11.5 }}>
       {generatedAt && <span style={{ color: T.textFaint }}>generated {generatedAt}</span>}
       <button onClick={() => setShowChannels(s => !s)} style={linkBtn}>{showChannels ? 'hide channels' : 'channels'}</button>
       <button onClick={generate} disabled={isGenerating} style={{ ...linkBtn, opacity: isGenerating ? 0.5 : 1 }}>{isGenerating ? 'generating...' : '↺ refresh'}</button>
@@ -125,13 +125,13 @@ export function SlackPage() {
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
       <Panel title="slack_digest" right={headerRight}>
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
-          {error && <div style={{ color: T.danger, fontSize: 11, marginBottom: 10 }}>{error}</div>}
+          {error && <div style={{ color: T.danger, fontSize: 15, marginBottom: 10 }}>{error}</div>}
           {showChannels && channels.length > 0 && (
             <div style={{ background: T.bg1, border: `1px solid ${T.border}`, borderRadius: 5, padding: '10px 14px', marginBottom: 12 }}>
-              <div style={{ fontSize: 11, color: T.textDim, marginBottom: 8 }}>channel blacklist (checked = included in digest)</div>
+              <div style={{ fontSize: 15, color: T.textDim, marginBottom: 8 }}>channel blacklist (checked = included in digest)</div>
               <div style={{ maxHeight: 160, overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {channels.map(ch => (
-                  <label key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', fontSize: 11, color: ch.isBlacklisted ? T.textGhost : T.text }}>
+                  <label key={ch.id} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', fontSize: 15, color: ch.isBlacklisted ? T.textGhost : T.text }}>
                     <input type="checkbox" checked={!ch.isBlacklisted} onChange={() => toggleBlacklist(ch.id)} style={{ accentColor: T.accent }} />
                     {ch.type === 'dm' ? 'dm' : ch.type === 'private' ? 'prv' : '#'} {ch.name}
                   </label>
@@ -142,7 +142,7 @@ export function SlackPage() {
           {(isLoading || (isGenerating && sections.length === 0)) ? skeleton
             : sections.map((s) => <SectionCard key={s.heading} section={s} />)}
           {!isLoading && !isGenerating && sections.length === 0 && (
-            <div style={{ color: T.textGhost, fontSize: 11, textAlign: 'center', paddingTop: 32 }}>no slack activity in the last 24h</div>
+            <div style={{ color: T.textGhost, fontSize: 15, textAlign: 'center', paddingTop: 32 }}>no slack activity in the last 24h</div>
           )}
         </div>
       </Panel>

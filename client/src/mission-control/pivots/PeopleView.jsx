@@ -20,18 +20,18 @@ function ActionBtn({ children, primary, hot }) {
       background: primary ? T.accent : T.bg3,
       color: primary ? T.bg0 : T.text,
       border: primary ? 'none' : `1px solid ${T.border}`,
-      borderRadius: 4, cursor: 'pointer', fontSize: 11.5, fontWeight: 600,
+      borderRadius: 4, cursor: 'pointer', fontSize: 13.5, fontWeight: 600,
       fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
     }}>
       {children}
-      {hot && <kbd style={{ fontSize: 9.5, padding: '1px 4px', borderRadius: 3, background: T.bg0, color: T.textDim, border: `1px solid ${T.border}` }}>{hot}</kbd>}
+      {hot && <kbd style={{ fontSize: 11.5, padding: '1px 4px', borderRadius: 3, background: T.bg0, color: T.textDim, border: `1px solid ${T.border}` }}>{hot}</kbd>}
     </button>
   );
 }
 
 function PersonDetail({ person }) {
   const T = useTheme();
-  if (!person) return <div style={{ padding: '32px 22px', color: T.textGhost, fontSize: 12, fontFamily: 'ui-monospace, Menlo, monospace' }}>select a person with j/k</div>;
+  if (!person) return <div style={{ padding: '32px 22px', color: T.textGhost, fontSize: 16, fontFamily: 'ui-monospace, Menlo, monospace' }}>select a person with j/k</div>;
 
   const isOverdue = !person.last1on1 || (Date.now() - new Date(person.last1on1).getTime()) > 14 * 86400000;
 
@@ -46,8 +46,8 @@ function PersonDetail({ person }) {
         }}>{person.initials}</div>
         <div>
           <div style={{ fontSize: 20, color: T.textHi, fontWeight: 600 }}>{person.name}</div>
-          <div style={{ fontSize: 11.5, color: T.textDim }}>{person.role} · last 1:1 {last1on1Label(person.last1on1)}</div>
-          {person.ooo && <div style={{ fontSize: 11, color: T.warn, marginTop: 2 }}>OOO</div>}
+          <div style={{ fontSize: 13.5, color: T.textDim }}>{person.role} · last 1:1 {last1on1Label(person.last1on1)}</div>
+          {person.ooo && <div style={{ fontSize: 15, color: T.warn, marginTop: 2 }}>OOO</div>}
         </div>
         <div style={{ flex: 1 }} />
         {person.notionUrl && (
@@ -60,24 +60,24 @@ function PersonDetail({ person }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginTop: 22 }}>
         <div>
-          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>cadence</div>
-          <div style={{ marginTop: 8, fontSize: 12, color: T.text, lineHeight: 1.7 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>cadence</div>
+          <div style={{ marginTop: 8, fontSize: 16, color: T.text, lineHeight: 1.7 }}>
             <div>last 1:1: {last1on1Label(person.last1on1)}</div>
             <div>status: {isOverdue ? <span style={{ color: T.warn }}>overdue</span> : <span style={{ color: T.accent }}>on track</span>}</div>
           </div>
 
-          <div style={{ marginTop: 18, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>talking points</div>
-          <div style={{ marginTop: 6, fontSize: 11.5, color: T.textDim }}>
+          <div style={{ marginTop: 18, fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>talking points</div>
+          <div style={{ marginTop: 6, fontSize: 13.5, color: T.textDim }}>
             Use <span style={{ color: T.accent }}>/1on1 {(person.name ?? '').split(' ')[0]?.toLowerCase()}</span> to pull from 1:1 notes.
           </div>
         </div>
 
         <div>
-          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>recent activity</div>
-          <div style={{ marginTop: 8, fontSize: 11, color: T.textDim, lineHeight: 1.7 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: T.accent }}>recent activity</div>
+          <div style={{ marginTop: 8, fontSize: 15, color: T.textDim, lineHeight: 1.7 }}>
             Activity stream (Slack + calendar + email) — Phase 7.
           </div>
-          <div style={{ marginTop: 22, padding: '10px 12px', background: T.bg3, borderLeft: `2px solid ${T.accent}`, fontSize: 11.5, color: T.textDim, lineHeight: 1.55 }}>
+          <div style={{ marginTop: 22, padding: '10px 12px', background: T.bg3, borderLeft: `2px solid ${T.accent}`, fontSize: 13.5, color: T.textDim, lineHeight: 1.55 }}>
             <span style={{ color: T.accent }}>last 1:1 notes</span> — open Notion doc for full notes.
           </div>
         </div>

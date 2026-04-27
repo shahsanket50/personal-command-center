@@ -26,21 +26,21 @@ function MessageBubble({ msg, isStreaming }) {
   return (
     <div style={{ padding: '12px 16px', background: isUser ? 'transparent' : T.bg1, borderBottom: `1px solid ${T.border}` }}>
       <div style={{ display: 'flex', gap: 12, maxWidth: 800, margin: '0 auto' }}>
-        <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 700, color: isUser ? T.accent : T.info, fontFamily: 'ui-monospace, Menlo, monospace', minWidth: 52, textAlign: 'right', paddingTop: 2 }}>
+        <span style={{ flexShrink: 0, fontSize: 16, fontWeight: 700, color: isUser ? T.accent : T.info, fontFamily: 'ui-monospace, Menlo, monospace', minWidth: 52, textAlign: 'right', paddingTop: 2 }}>
           {isUser ? 'you >' : 'claude >'}
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
           {parts.map((p, i) => p.type === 'code' ? (
             <div key={i} style={{ borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
               {p.language && p.language !== 'text' && (
-                <div style={{ background: '#1a1a2e', padding: '3px 10px', fontSize: 9.5, color: T.textDim, borderBottom: `1px solid ${T.border}` }}>{p.language}</div>
+                <div style={{ background: '#1a1a2e', padding: '3px 10px', fontSize: 11.5, color: T.textDim, borderBottom: `1px solid ${T.border}` }}>{p.language}</div>
               )}
-              <SyntaxHighlighter language={p.language || 'text'} style={oneDark} customStyle={{ margin: 0, borderRadius: 0, fontSize: 12 }} wrapLongLines>
+              <SyntaxHighlighter language={p.language || 'text'} style={oneDark} customStyle={{ margin: 0, borderRadius: 0, fontSize: 16 }} wrapLongLines>
                 {p.content}
               </SyntaxHighlighter>
             </div>
           ) : (
-            <p key={i} style={{ color: T.text, fontSize: 12, lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: '0 0 4px', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
+            <p key={i} style={{ color: T.text, fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: '0 0 4px', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
               {p.content}
               {isStreaming && i === parts.length - 1 && (
                 <span style={{ display: 'inline-block', width: 8, height: 14, background: T.accent, marginLeft: 2, verticalAlign: 'middle', animation: 'mc-pulse 1s infinite' }} />
@@ -55,7 +55,7 @@ function MessageBubble({ msg, isStreaming }) {
 
 export function ClaudePage() {
   const T = useTheme();
-  const hdrBtn = { background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 3, color: T.textDim, cursor: 'pointer', fontSize: 10, padding: '3px 8px', fontFamily: 'ui-monospace, Menlo, monospace' };
+  const hdrBtn = { background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 3, color: T.textDim, cursor: 'pointer', fontSize: 16, padding: '3px 8px', fontFamily: 'ui-monospace, Menlo, monospace' };
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -169,19 +169,19 @@ export function ClaudePage() {
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 16px', background: T.bg1, borderBottom: `1px solid ${T.border}`, flexShrink: 0, fontSize: 10.5 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 16px', background: T.bg1, borderBottom: `1px solid ${T.border}`, flexShrink: 0, fontSize: 14.5 }}>
         <span style={{ color: T.accent }}>$ claude-chat</span>
         <span style={{ color: T.textGhost }}>claude-sonnet-4-5</span>
         <span style={{ color: T.textFaint }}>{exchangeCount} exchanges</span>
         <div style={{ flex: 1 }} />
-        {saveStatus && <span style={{ color: saveStatus === 'error' ? T.danger : T.textDim, fontSize: 10 }}>{saveStatus}</span>}
+        {saveStatus && <span style={{ color: saveStatus === 'error' ? T.danger : T.textDim, fontSize: 16 }}>{saveStatus}</span>}
         <button onClick={handleSave} style={hdrBtn}>Save to Notion</button>
         <button onClick={() => { abortRef.current?.abort(); setMessages([]); setHistoryIdx(-1); }} style={hdrBtn}>Clear</button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', background: T.bg0 }}>
         {messages.length === 0 && (
-          <div style={{ padding: '48px 24px', textAlign: 'center', color: T.textGhost, fontSize: 12 }}>
+          <div style={{ padding: '48px 24px', textAlign: 'center', color: T.textGhost, fontSize: 16 }}>
             $ ask anything \u2014 \u2191\u2193 history \u00b7 Ctrl+C abort
           </div>
         )}
@@ -192,19 +192,19 @@ export function ClaudePage() {
       </div>
 
       <div style={{ display: 'flex', gap: 8, padding: '8px 16px', background: T.bg1, borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
-        <span style={{ color: T.accent, fontSize: 13, alignSelf: 'center' }}>{'>'}</span>
+        <span style={{ color: T.accent, fontSize: 15, alignSelf: 'center' }}>{'>'}</span>
         <textarea
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder="ask something\u2026 (Enter to send, Shift+Enter newline)"
-          style={{ flex: 1, background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontSize: 12.5, padding: '6px 10px', outline: 'none', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5 }}
+          style={{ flex: 1, background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontSize: 14.5, padding: '6px 10px', outline: 'none', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5 }}
         />
         <button
           onClick={() => sendMessage()}
           disabled={isStreaming || !input.trim()}
-          style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 4, color: T.accent, cursor: 'pointer', fontSize: 11, padding: '0 12px', alignSelf: 'stretch', opacity: (isStreaming || !input.trim()) ? 0.4 : 1 }}
+          style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 4, color: T.accent, cursor: 'pointer', fontSize: 15, padding: '0 12px', alignSelf: 'stretch', opacity: (isStreaming || !input.trim()) ? 0.4 : 1 }}
         >
           {isStreaming ? '\u2026' : '\u23ce'}
         </button>

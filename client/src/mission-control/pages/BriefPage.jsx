@@ -24,10 +24,10 @@ function SectionCard({ section }) {
   const icon = SECTION_ICONS[section.heading.toLowerCase()] ?? '◆';
   return (
     <div style={{ background: T.bg1, border: `1px solid ${T.border}`, borderRadius: 5, padding: '14px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontSize: 12, color: T.textHi, fontWeight: 600 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontSize: 16, color: T.textHi, fontWeight: 600 }}>
         <span style={{ color: T.accent }}>{icon}</span>{section.heading}
       </div>
-      <div style={{ fontSize: 11.5, color: T.text, lineHeight: 1.7 }}>
+      <div style={{ fontSize: 13.5, color: T.text, lineHeight: 1.7 }}>
         {section.body.filter(l => l.trim()).map((line, i) => {
           if (line.startsWith('- ') || line.startsWith('* ')) return (
             <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 2 }}>
@@ -104,16 +104,16 @@ export function BriefPage() {
       <Panel
         title="morning_brief"
         right={
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 9.5 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 11.5 }}>
             {generatedAt && <span style={{ color: T.textFaint }}>generated {generatedAt}</span>}
-            <button onClick={generate} disabled={isGenerating} style={{ background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 9.5, fontFamily: 'inherit', opacity: isGenerating ? 0.5 : 1 }}>
+            <button onClick={generate} disabled={isGenerating} style={{ background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 11.5, fontFamily: 'inherit', opacity: isGenerating ? 0.5 : 1 }}>
               {isGenerating ? 'generating…' : '↺ refresh'}
             </button>
           </div>
         }
       >
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
-          {error && <div style={{ color: T.danger, fontSize: 11, marginBottom: 12 }}>{error}</div>}
+          {error && <div style={{ color: T.danger, fontSize: 15, marginBottom: 12 }}>{error}</div>}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {isGenerating && sections.length === 0 ? skeleton : sections.map((s) => <SectionCard key={s.heading} section={s} />)}
           </div>

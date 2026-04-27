@@ -24,8 +24,8 @@ function SectionCard({ section }) {
   const label = SECTION_LABELS[section.heading] ?? '[ ]';
   return (
     <div style={{ background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 5, padding: '12px 14px', marginBottom: 10 }}>
-      <div style={{ fontSize: 11.5, fontWeight: 600, color: T.textHi, marginBottom: 8 }}>{label} {section.heading}</div>
-      <div style={{ fontSize: 11, color: T.textDim, lineHeight: 1.6 }}>
+      <div style={{ fontSize: 13.5, fontWeight: 600, color: T.textHi, marginBottom: 8 }}>{label} {section.heading}</div>
+      <div style={{ fontSize: 15, color: T.textDim, lineHeight: 1.6 }}>
         {section.body.filter(l => l.trim()).map((line, i) => {
           if (line.startsWith('- [ ]')) return <div key={i} style={{ color: T.warn, marginBottom: 2 }}>□ {line.replace('- [ ]', '').trim()}</div>;
           if (line.startsWith('- ') || line.startsWith('* ')) return <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 2 }}><span style={{ color: T.textGhost }}>·</span><span>{line.slice(2)}</span></div>;
@@ -112,12 +112,12 @@ export function EmailPage() {
   ));
 
   const headerRight = (
-    <div style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 9.5 }}>
+    <div style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 11.5 }}>
       {generatedAt && <span style={{ color: T.textFaint }}>generated {generatedAt}</span>}
       <button
         onClick={generate}
         disabled={isGenerating}
-        style={{ background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 9.5, fontFamily: 'inherit', opacity: isGenerating ? 0.5 : 1, padding: 0 }}
+        style={{ background: 'transparent', border: 'none', color: T.textDim, cursor: 'pointer', fontSize: 11.5, fontFamily: 'inherit', opacity: isGenerating ? 0.5 : 1, padding: 0 }}
       >
         {isGenerating ? 'generating...' : '↺ refresh'}
       </button>
@@ -129,11 +129,11 @@ export function EmailPage() {
       <style>{`@keyframes mc-skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
       <Panel title="email_triage" right={headerRight}>
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
-          {error && <div style={{ color: T.danger, fontSize: 11, marginBottom: 10 }}>{error}</div>}
+          {error && <div style={{ color: T.danger, fontSize: 15, marginBottom: 10 }}>{error}</div>}
           {(isLoading || (isGenerating && sections.length === 0)) ? skeleton
             : sections.map(s => <SectionCard key={s.heading} section={s} />)}
           {!isLoading && !isGenerating && sections.length === 0 && !error && (
-            <div style={{ color: T.textGhost, fontSize: 11, textAlign: 'center', paddingTop: 32 }}>no unread emails</div>
+            <div style={{ color: T.textGhost, fontSize: 15, textAlign: 'center', paddingTop: 32 }}>no unread emails</div>
           )}
         </div>
       </Panel>

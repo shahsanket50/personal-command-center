@@ -53,19 +53,19 @@ export function TopBar({ onCmd }) {
         display: 'flex', alignItems: 'center', height: 28, padding: '0 12px', gap: 10,
         background: T.bg0, borderBottom: `1px solid ${T.border}`,
       }}>
-        <span style={{ color: T.accent, fontSize: 9, letterSpacing: '.12em', fontWeight: 700 }}>
+        <span style={{ color: T.accent, fontSize: 11, letterSpacing: '.12em', fontWeight: 700 }}>
           MISSION CONTROL
         </span>
         <div style={{ flex: 1 }} />
-        <span style={{ color: dotColor(conn.microsoft), fontSize: 8 }}>● ms</span>
-        <span style={{ color: dotColor(conn.gmail),     fontSize: 8 }}>● gmail</span>
+        <span style={{ color: dotColor(conn.microsoft), fontSize: 10 }}>● ms</span>
+        <span style={{ color: dotColor(conn.gmail),     fontSize: 10 }}>● gmail</span>
         <button
           onClick={onCmd}
           onMouseDown={e => e.preventDefault()}
           style={{
             display: 'flex', alignItems: 'center', gap: 6, padding: '2px 8px',
             background: T.bg2, border: `1px solid ${T.borderHi}`, borderRadius: 3,
-            color: T.textDim, fontSize: 8, cursor: 'pointer',
+            color: T.textDim, fontSize: 10, cursor: 'pointer',
           }}
         >
           ⌘K
@@ -89,12 +89,12 @@ export function TopBar({ onCmd }) {
                 padding: '0 14px', height: '100%', border: 'none', cursor: 'pointer',
                 background: 'transparent',
                 color: active ? T.accent : T.textDim,
-                fontSize: 9.5,
+                fontSize: 11.5,
                 borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
               }}
             >
               {p.label}
-              <span style={{ color: T.textGhost, fontSize: 8 }}>{p.key}</span>
+              <span style={{ color: T.textGhost, fontSize: 10 }}>{p.key}</span>
             </button>
           );
         })}
@@ -116,7 +116,7 @@ export function TopBar({ onCmd }) {
                 padding: '0 10px', height: '100%', border: 'none', cursor: 'pointer',
                 background: 'transparent',
                 color: active ? T.accent : T.textDim,
-                fontSize: 8,
+                fontSize: 10,
                 borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
               }}
             >
@@ -132,7 +132,7 @@ export function TopBar({ onCmd }) {
             padding: '0 10px', height: '100%', border: 'none', cursor: 'pointer',
             background: 'transparent',
             color: location.pathname === '/settings' ? T.accent : T.textFaint,
-            fontSize: 8,
+            fontSize: 10,
             borderLeft: `1px solid ${T.border}`,
             borderBottom: location.pathname === '/settings' ? `2px solid ${T.accent}` : '2px solid transparent',
           }}
