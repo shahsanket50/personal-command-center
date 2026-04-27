@@ -66,8 +66,10 @@ export function ClaudePage({ accent }) {
   const bottomRef = useRef(null);
   const autoSubmitted = useRef(false);
   const messagesRef = useRef([]);
+  const inputRef = useRef('');
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { inputRef.current = input; }, [input]);
 
   useEffect(() => {
     return () => { abortRef.current?.abort(); };
@@ -76,7 +78,7 @@ export function ClaudePage({ accent }) {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const sendMessage = useCallback(async (text) => {
-    const prompt = (typeof text === 'string' ? text : input).trim();
+    const prompt = (typeof text === 'string' ? text : inputRef.current).trim();
     if (!prompt || isStreaming) return;
 
     setHistory(prev => [prompt, ...prev.filter(h => h !== prompt)]);
@@ -128,7 +130,7 @@ export function ClaudePage({ accent }) {
       setIsStreaming(false);
       abortRef.current = null;
     }
-  }, [input, isStreaming]);
+  }, [isStreaming]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
