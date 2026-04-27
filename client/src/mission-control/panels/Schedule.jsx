@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 
 const API = 'http://localhost:3001/api';
 
@@ -19,13 +19,14 @@ function NowLine() {
   );
 }
 
-function EventRow({ ev, accent, onNavigate }) {
+function EventRow({ ev, onNavigate }) {
+  const T = useTheme();
   const now = new Date();
   const start = new Date(ev.start?.dateTime ?? ev.start?.date);
   const end = new Date(ev.end?.dateTime ?? ev.end?.date);
   const isPast = end < now;
   const isNow = start <= now && now < end;
-  const tagColor = ev.source === 'personal' ? '#10b981' : isNow ? accent : T.info;
+  const tagColor = ev.source === 'personal' ? '#10b981' : isNow ? T.accent : T.info;
   const startLabel = ev.start?.dateTime
     ? new Date(ev.start.dateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
     : '';
@@ -53,7 +54,8 @@ function EventRow({ ev, accent, onNavigate }) {
   );
 }
 
-export function Schedule({ accent }) {
+export function Schedule() {
+  const T = useTheme();
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
 
@@ -82,7 +84,7 @@ export function Schedule({ accent }) {
           }}>
             <div style={{ color: T.textGhost, minWidth: 32, fontSize: 10.5 }}>{String(h).padStart(2, '0')}:00</div>
             <div style={{ flex: 1 }}>
-              {evs.map((ev, j) => <EventRow key={ev.id ?? j} ev={ev} accent={accent} onNavigate={() => navigate('/calendar')} />)}
+              {evs.map((ev, j) => <EventRow key={ev.id ?? j} ev={ev} onNavigate={() => navigate('/calendar')} />)}
             </div>
           </div>
         );

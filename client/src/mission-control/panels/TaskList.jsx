@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 
 const API = 'http://localhost:3001/api';
 const TODAY = new Date().toISOString().split('T')[0];
@@ -22,7 +22,8 @@ function dueLabel(dueDate) {
   return dueDate.slice(5);
 }
 
-export function TaskList({ focused, cursor, accent, onLoaded }) {
+export function TaskList({ focused, cursor, onLoaded }) {
+  const T = useTheme();
   const [tasks, setTasks] = useState([]);
   const [hoveredId, setHoveredId] = useState(null);
   const navigate = useNavigate();
@@ -89,7 +90,7 @@ export function TaskList({ focused, cursor, accent, onLoaded }) {
               display: 'flex', gap: 8, padding: '4px 10px', alignItems: 'center',
               background: isCursor ? T.bg4 : 'transparent', borderRadius: 3,
               color: isCursor ? T.textHi : T.text,
-              borderLeft: isCursor ? `2px solid ${accent}` : '2px solid transparent',
+              borderLeft: isCursor ? `2px solid ${T.accent}` : '2px solid transparent',
             }}
             onMouseEnter={() => setHoveredId(t.id)}
             onMouseLeave={() => setHoveredId(null)}

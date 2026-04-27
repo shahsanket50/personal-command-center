@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { T, LANE_META, LANE_ORDER } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
+import { LANE_META, LANE_ORDER } from '../theme.js';
 
 const API = 'http://localhost:3001/api';
 const COLLAPSED_DEFAULTS = new Set(['broadcast', 'fyi']);
@@ -11,7 +12,8 @@ const AlertIcon = () => <svg viewBox="0 0 16 16" width="11" height="11" fill="no
 
 const KIND_ICON = { slack: SlackIcon, email: MailIcon, cal: CalIcon };
 
-function FilterChips({ active, setActive, counts, accent }) {
+function FilterChips({ active, setActive, counts }) {
+  const T = useTheme();
   const chips = [
     { id: 'all', label: 'all', n: counts.all },
     { id: 'urgent', label: 'urgent', n: counts.urgent },
@@ -25,13 +27,13 @@ function FilterChips({ active, setActive, counts, accent }) {
           <button key={c.id} onClick={() => setActive(c.id)} onMouseDown={(e) => e.preventDefault()} style={{
             display: 'flex', alignItems: 'center', gap: 5, padding: '2px 8px',
             background: on ? T.bg4 : 'transparent',
-            color: on ? accent : T.textDim,
-            border: `1px solid ${on ? accent + '66' : T.border}`,
+            color: on ? T.accent : T.textDim,
+            border: `1px solid ${on ? T.accent + '66' : T.border}`,
             borderRadius: 10, cursor: 'pointer', fontSize: 10.5, fontWeight: 500, fontFamily: 'inherit', outline: 'none',
           }}>
             {c.dot && <span style={{ width: 5, height: 5, borderRadius: 3, background: c.dot, display: 'inline-block' }} />}
             {c.label}
-            <span style={{ color: on ? accent : T.textGhost, fontSize: 9.5 }}>{c.n}</span>
+            <span style={{ color: on ? T.accent : T.textGhost, fontSize: 9.5 }}>{c.n}</span>
           </button>
         );
       })}
@@ -39,7 +41,8 @@ function FilterChips({ active, setActive, counts, accent }) {
   );
 }
 
-export function TriageStream({ focused, cursor, accent, filter, setFilter, compact, onLoaded }) {
+export function TriageStream({ focused, cursor, filter, setFilter, compact, onLoaded }) {
+  const T = useTheme();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [collapsed, setCollapsed] = useState(COLLAPSED_DEFAULTS);
@@ -81,7 +84,7 @@ export function TriageStream({ focused, cursor, accent, filter, setFilter, compa
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1 }}>
-      {!compact && <FilterChips active={filter} setActive={setFilter} counts={counts} accent={accent} />}
+      {!compact && <FilterChips active={filter} setActive={setFilter} counts={counts} />}
       <div className="mc-scroll" style={{ flex: 1, overflow: 'auto', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11 }}>
         {sections.map((sec, si) => {
           const isCollapsed = collapsed.has(sec.lane ?? '');
@@ -112,7 +115,7 @@ export function TriageStream({ focused, cursor, accent, filter, setFilter, compa
                         padding: '6px 11px',
                         background: isCursor ? T.bg4 : 'transparent',
                         borderBottom: `1px solid ${T.bg2}`,
-                        borderLeft: isCursor ? `2px solid ${accent}` : `2px solid ${laneColor}22`,
+                        borderLeft: isCursor ? `2px solid ${T.accent}` : `2px solid ${laneColor}22`,
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <Icon />

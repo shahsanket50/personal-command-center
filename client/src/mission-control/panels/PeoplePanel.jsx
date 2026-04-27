@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { T } from '../theme.js';
+import { useTheme } from '../ThemeContext.jsx';
 
 const API = 'http://localhost:3001/api';
 
@@ -12,7 +12,8 @@ function last1on1Label(dateStr) {
   return `${Math.floor(days / 7)} wks ago`;
 }
 
-export function PeoplePanel({ focused, cursor, accent, onLoaded, onSelect }) {
+export function PeoplePanel({ focused, cursor, onLoaded, onSelect }) {
+  const T = useTheme();
   const [people, setPeople] = useState([]);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export function PeoplePanel({ focused, cursor, accent, onLoaded, onSelect }) {
             padding: '6px 11px', borderBottom: `1px solid ${T.bg2}`,
             display: 'flex', alignItems: 'center', gap: 9,
             background: isCursor ? T.bg4 : 'transparent',
-            borderLeft: isCursor ? `2px solid ${accent}` : '2px solid transparent',
+            borderLeft: isCursor ? `2px solid ${T.accent}` : '2px solid transparent',
             cursor: 'pointer',
           }}>
             <span style={{
