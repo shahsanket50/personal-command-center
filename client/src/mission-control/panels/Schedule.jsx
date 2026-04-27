@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { T } from '../theme.js';
 
 const API = 'http://localhost:3001/api';
@@ -18,7 +19,7 @@ function NowLine() {
   );
 }
 
-function EventRow({ ev, accent }) {
+function EventRow({ ev, accent, onNavigate }) {
   const now = new Date();
   const start = new Date(ev.start?.dateTime ?? ev.start?.date);
   const end = new Date(ev.end?.dateTime ?? ev.end?.date);
@@ -30,14 +31,17 @@ function EventRow({ ev, accent }) {
     : '';
 
   return (
-    <div style={{
-      padding: '2px 7px', background: isNow ? T.bg4 : T.bg3,
-      borderLeft: `2px solid ${tagColor}`,
-      fontSize: 11, color: isPast ? T.textGhost : isNow ? T.textHi : T.text,
-      borderRadius: 2, marginBottom: 2,
-      display: 'flex', alignItems: 'center', gap: 6,
-      textDecoration: isPast ? 'line-through' : 'none',
-    }}>
+    <div
+      onClick={onNavigate}
+      style={{
+        padding: '2px 7px', background: isNow ? T.bg4 : T.bg3,
+        borderLeft: `2px solid ${tagColor}`,
+        fontSize: 11, color: isPast ? T.textGhost : isNow ? T.textHi : T.text,
+        borderRadius: 2, marginBottom: 2,
+        display: 'flex', alignItems: 'center', gap: 6,
+        textDecoration: isPast ? 'line-through' : 'none',
+        cursor: 'pointer',
+      }}
       <span style={{ color: T.textFaint, fontSize: 10, minWidth: 36 }}>{startLabel.replace(':', '')}</span>
       {isNow && <span style={{ color: '#10b981', animation: 'mc-pulse 1.6s infinite' }}>●</span>}
       <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -49,6 +53,7 @@ function EventRow({ ev, accent }) {
 }
 
 export function Schedule({ accent }) {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
@@ -76,7 +81,7 @@ export function Schedule({ accent }) {
           }}>
             <div style={{ color: T.textGhost, minWidth: 32, fontSize: 10.5 }}>{String(h).padStart(2, '0')}:00</div>
             <div style={{ flex: 1 }}>
-              {evs.map((ev, j) => <EventRow key={ev.id ?? j} ev={ev} accent={accent} />)}
+              {evs.map((ev, j) => <EventRow key={ev.id ?? j} ev={ev} accent={accent} onNavigate={() => navigate('/calendar')} />)}
             </div>
           </div>
         );
