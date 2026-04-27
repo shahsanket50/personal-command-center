@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { T } from '../theme.js';
 import { Panel } from '../components/Panel.jsx';
 
@@ -19,12 +19,12 @@ function parseSections(text) {
   return sections;
 }
 
-function SectionCard({ section }) {
+function SectionCard({ section, accent }) {
   const icon = SECTION_ICONS[section.heading.toLowerCase()] ?? '◆';
   return (
     <div style={{ background: T.bg1, border: `1px solid ${T.border}`, borderRadius: 5, padding: '14px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontSize: 12, color: T.textHi, fontWeight: 600 }}>
-        <span style={{ color: '#86efac' }}>{icon}</span>{section.heading}
+        <span style={{ color: accent }}>{icon}</span>{section.heading}
       </div>
       <div style={{ fontSize: 11.5, color: T.text, lineHeight: 1.7 }}>
         {section.body.filter(l => l.trim()).map((line, i) => {
@@ -46,43 +46,59 @@ export function BriefPage({ accent }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAt, setGeneratedAt] = useState(null);
   const [error, setError] = useState(null);
+  const abortRef = useRef(null);
 
-  useEffect(() => { fetchCached(); }, []);
+  useEffect(() => {
+    fetchCached();
+    return () => abortRef.current?.abort();
+  }, []);
 
   async function fetchCached() {
     try {
       const res = await fetch(`${API}/brief/today`);
-      if (!res.ok) throw new Error('not found');
+      if (res.status === 404 || !res.ok) { return; } // no brief yet, user can click Refresh
       const data = await res.json();
-      if (data?.content) { setSections(parseSections(data.content)); setGeneratedAt(new Date().toLocaleTimeString()); }
-      else await generate();
-    } catch { await generate(); }
+      if (data?.content) {
+        setSections(parseSections(data.content));
+        setGeneratedAt(new Date().toLocaleTimeString());
+      }
+      // 200 but no content → show empty state, do not auto-generate
+    } catch (e) {
+      setError(e.message); // show error, do not call generate()
+    }
   }
 
   async function generate() {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setIsGenerating(true); setError(null); setSections([]);
     try {
-      const res = await fetch(`${API}/brief/generate`, { method: 'POST' });
-      const reader = res.body.getReader(); const decoder = new TextDecoder(); let acc = '';
+      const res = await fetch(`${API}/brief/generate`, { method: 'POST', signal: controller.signal });
+      const reader = res.body.getReader(); const decoder = new TextDecoder(); let acc = ''; let buf = '';
       while (true) {
         const { done, value } = await reader.read(); if (done) break;
-        for (const line of decoder.decode(value).split('\n')) {
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n'); buf = lines.pop() ?? '';
+        for (const line of lines) {
           if (!line.startsWith('data:')) continue;
           const p = line.slice(5).trim(); if (p === '[DONE]') break;
           try { const { text } = JSON.parse(p); if (text) { acc += text; setSections(parseSections(acc)); } } catch { /* skip */ }
         }
       }
       setGeneratedAt(new Date().toLocaleTimeString());
-    } catch (e) { setError(e.message); }
-    finally { setIsGenerating(false); }
+    } catch (e) {
+      if (e.name !== 'AbortError') setError(e.message);
+    } finally { setIsGenerating(false); }
   }
 
   const skeleton = Array.from({ length: 4 }, (_, i) => (
-    <div key={i} style={{ background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 5, height: 100 }} />
+    <div key={i} style={{ background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 5, height: 100, animation: 'mc-skeleton-pulse 1.5s ease-in-out infinite' }} />
   ));
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
+      <style>{`@keyframes mc-skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
       <Panel
         title="morning_brief"
         accent={accent}
@@ -98,7 +114,7 @@ export function BriefPage({ accent }) {
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
           {error && <div style={{ color: T.danger, fontSize: 11, marginBottom: 12 }}>{error}</div>}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {isGenerating && sections.length === 0 ? skeleton : sections.map((s, i) => <SectionCard key={i} section={s} />)}
+            {isGenerating && sections.length === 0 ? skeleton : sections.map((s) => <SectionCard key={s.heading} section={s} accent={accent} />)}
           </div>
         </div>
       </Panel>
