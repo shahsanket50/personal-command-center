@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
-import { T, PIVOTS, PIVOT_PANELS } from './mission-control/theme.js';
+import { PIVOTS, PIVOT_PANELS } from './mission-control/theme.js';
+import { ThemeProvider, useTheme } from './mission-control/ThemeContext.jsx';
 import { useKeyboard } from './mission-control/useKeyboard.js';
 import { TopBar } from './mission-control/components/TopBar.jsx';
 import { KeyHints } from './mission-control/components/KeyHints.jsx';
@@ -18,16 +19,16 @@ import { EmailPage }    from './mission-control/pages/EmailPage.jsx';
 import { SettingsPage } from './mission-control/pages/SettingsPage.jsx';
 import { GoalsPage }    from './mission-control/pages/GoalsPage.jsx';
 
-const ACCENT = '#86efac';
 const API = 'http://localhost:3001/api';
 
 const PATH_TO_PIVOT = { '/': 'today', '/triage': 'triage', '/people': 'people' };
 const PIVOT_PATHS   = { today: '/', triage: '/triage', people: '/people' };
 const CURSOR_KEY    = { triage: 'triage', tasks: 'tasks', people: 'people' };
 
-export default function App() {
+function AppInner() {
   const location = useLocation();
   const navigate = useNavigate();
+  const T = useTheme();
 
   const pivot = PATH_TO_PIVOT[location.pathname] ?? 'today';
   const isModulePage = !PATH_TO_PIVOT[location.pathname];
@@ -137,27 +138,27 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', background: T.bg0, overflow: 'hidden' }}>
-      <TopBar onCmd={() => setCmdOpen(true)} accent={ACCENT} />
+      <TopBar onCmd={() => setCmdOpen(true)} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
         <Routes>
           <Route path="/" element={
-            <TodayView panelFocus={panelFocus} cursors={cursors} accent={ACCENT} triageFilter={triageFilter} setTriageFilter={setTriageFilter} onTasksLoaded={(l) => setTaskLen(l.length)} onTriageLoaded={(l) => setTriageLen(l.length)} onPeopleLoaded={(l) => setPeopleLen(l.length)} />
+            <TodayView panelFocus={panelFocus} cursors={cursors} triageFilter={triageFilter} setTriageFilter={setTriageFilter} onTasksLoaded={(l) => setTaskLen(l.length)} onTriageLoaded={(l) => setTriageLen(l.length)} onPeopleLoaded={(l) => setPeopleLen(l.length)} />
           } />
           <Route path="/triage" element={
-            <TriageView panelFocus={panelFocus} cursors={cursors} accent={ACCENT} filter={triageFilter} setFilter={setTriageFilter} onTriageLoaded={(l) => setTriageLen(l.length)} />
+            <TriageView panelFocus={panelFocus} cursors={cursors} filter={triageFilter} setFilter={setTriageFilter} onTriageLoaded={(l) => setTriageLen(l.length)} />
           } />
           <Route path="/people" element={
-            <PeopleView panelFocus={panelFocus} cursors={cursors} accent={ACCENT} onPeopleLoaded={(l) => setPeopleLen(l.length)} />
+            <PeopleView panelFocus={panelFocus} cursors={cursors} onPeopleLoaded={(l) => setPeopleLen(l.length)} />
           } />
-          <Route path="/notes"    element={<NotesPage    accent={ACCENT} />} />
-          <Route path="/calendar" element={<CalendarPage accent={ACCENT} />} />
-          <Route path="/claude"   element={<ClaudePage   accent={ACCENT} />} />
-          <Route path="/brief"    element={<BriefPage    accent={ACCENT} />} />
-          <Route path="/slack"    element={<SlackPage    accent={ACCENT} />} />
-          <Route path="/email"    element={<EmailPage    accent={ACCENT} />} />
-          <Route path="/settings" element={<SettingsPage accent={ACCENT} />} />
-          <Route path="/goals"    element={<GoalsPage    accent={ACCENT} />} />
+          <Route path="/notes"    element={<NotesPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/claude"   element={<ClaudePage />} />
+          <Route path="/brief"    element={<BriefPage />} />
+          <Route path="/slack"    element={<SlackPage />} />
+          <Route path="/email"    element={<EmailPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/goals"    element={<GoalsPage />} />
         </Routes>
       </div>
 
@@ -166,16 +167,24 @@ export default function App() {
       {gPressed && (
         <div style={{
           position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)',
-          padding: '8px 14px', background: T.bg2, border: `1px solid ${ACCENT}`,
+          padding: '8px 14px', background: T.bg2, border: `1px solid ${T.accent}`,
           borderRadius: 6, fontFamily: 'ui-monospace, Menlo, monospace',
           fontSize: 12, color: T.textHi, zIndex: 50,
         }}>
-          <span style={{ color: ACCENT }}>g</span> + <span style={{ color: T.warn }}>t</span>oday · <span style={{ color: T.warn }}>i</span>nbox · <span style={{ color: T.warn }}>p</span>eople
+          <span style={{ color: T.accent }}>g</span> + <span style={{ color: T.warn }}>t</span>oday · <span style={{ color: T.warn }}>i</span>nbox · <span style={{ color: T.warn }}>p</span>eople
         </div>
       )}
 
-      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} accent={ACCENT} onCommand={handleCommand} />
-      <HelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} accent={ACCENT} />
+      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} onCommand={handleCommand} />
+      <HelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }
