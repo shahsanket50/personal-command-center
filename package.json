@@ -1,0 +1,38 @@
+{
+  "name": "personal-command-center",
+  "version": "0.1.0",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "electron:dev": "NODE_ENV=development electron .",
+    "electron:build": "npm run build && electron-builder",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.sanket.personal-command-center",
+    "productName": "Command Center",
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity"
+    },
+    "files": [
+      "electron/**",
+      "server/**",
+      "client/dist/**",
+      "node_modules/**",
+      "!node_modules/.cache",
+      "!**/.env"
+    ],
+    "extraResources": [
+      { "from": ".env.example", "to": ".env.example" }
+    ]
+  }
+}
