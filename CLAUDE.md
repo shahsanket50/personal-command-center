@@ -104,7 +104,8 @@ MC Navigation & Module Pages complete — three-row top bar, URL-based pivot rou
 Font size + theme system complete — 5 named themes (dark/light/paper/ocean/forest), React context via ThemeProvider/useTheme(), Settings Appearance tab with swatch picker, localStorage persistence, +2px font scale across all MC files, accent prop removed from all call sites.
 Spec B complete — Brief history sidebar (browse past briefs by date) and Claude session history (load + continue past sessions) added to MC pages.
 Spec C complete — Microsoft Graph auth replaced with bearer token flow; Settings token field with Graph Explorer link; expiry banner on Calendar/Email pages.
-Next: Spec D1 — Electron menubar app + Docker Compose.
+Spec D1 complete — Electron menubar tray app; docker-compose up one-command setup for local sharing and AWS-ready server container.
+Next: Spec D2 — Postgres full migration (replace Notion).
 
 ## Backlog (deferred cleanup)
 - Remove `client/src/modules/` entirely once all MC pages (`client/src/mission-control/pages/`) are stable and verified. Old modules are no longer routed but kept as reference during the migration.
