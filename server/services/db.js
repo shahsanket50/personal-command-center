@@ -91,3 +91,40 @@ export async function getLatestEmailDigestForDate(dateStr) {
   );
   return rows[0]?.content ?? null;
 }
+
+// ─── Claude Conversations ────────────────────────────────────────────────────
+
+export async function saveConversation(title, messages) {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  await query(
+    `INSERT INTO daily_briefings (date, type, title, content)
+     VALUES ($1, 'claude_cli', $2, $3)`,
+    [dateStr, title, JSON.stringify(messages)]
+  );
+}
+
+export async function listConversations() {
+  const { rows } = await query(
+    `SELECT id, title, date, created_at FROM daily_briefings
+     WHERE type = 'claude_cli'
+     ORDER BY created_at DESC
+     LIMIT 50`
+  );
+  return rows.map(r => ({
+    id: r.id,
+    title: r.title,
+    date: r.date.toISOString().slice(0, 10),
+  }));
+}
+
+export async function getConversationById(id) {
+  const { rows } = await query(
+    `SELECT id, title, content FROM daily_briefings WHERE id = $1`,
+    [id]
+  );
+  if (!rows.length) return null;
+  let messages = [];
+  try { messages = JSON.parse(rows[0].content); } catch { messages = []; }
+  return { id: rows[0].id, title: rows[0].title, messages };
+}
