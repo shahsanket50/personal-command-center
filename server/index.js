@@ -15,6 +15,7 @@ import slackRoutes from './routes/slack.js';
 import emailRoutes from './routes/email.js';
 import triageRoutes from './routes/triage.js';
 import peopleRoutes from './routes/people.js';
+import { runMigrations } from './services/db.js';
 
 // Load .env using an explicit path relative to this file, not process.cwd().
 // This means `cd server && npm run dev` and `node server/index.js` both work.
@@ -54,31 +55,45 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`\nServer running on http://localhost:${PORT}`);
-  console.log(`Loading .env from: ${envPath}`);
-
-  if (dotenvResult.error) {
-    console.warn(`⚠  .env not found — ${dotenvResult.error.message}`);
-    return;
+async function start() {
+  if (process.env.DATABASE_URL) {
+    try {
+      await runMigrations();
+      console.log('✓ DB migrations complete');
+    } catch (e) {
+      console.error('✗ DB migration failed:', e.message);
+      process.exit(1);
+    }
   }
 
-  const loaded = Object.keys(dotenvResult.parsed || {});
-  const set = loaded.filter((k) => process.env[k]);
-  const empty = loaded.filter((k) => !process.env[k]);
+  app.listen(PORT, () => {
+    console.log(`\nServer running on http://localhost:${PORT}`);
+    console.log(`Loading .env from: ${envPath}`);
 
-  console.log(`\nEnv vars loaded (${set.length}/${loaded.length} non-empty):`);
-  set.forEach((k) => console.log(`  ✓ ${k}`));
-  if (empty.length) {
-    console.log(`\nPresent but empty:`);
-    empty.forEach((k) => console.log(`  ○ ${k}`));
-  }
+    if (dotenvResult.error) {
+      console.warn(`⚠  .env not found — ${dotenvResult.error.message}`);
+      return;
+    }
 
-  const critical = ['ANTHROPIC_API_KEY', 'NOTION_API_KEY', 'NOTION_DB_DAILY_BRIEFINGS'];
-  const missing = critical.filter((k) => !process.env[k]);
-  if (missing.length) {
-    console.warn(`\n⚠  Missing critical keys: ${missing.join(', ')}`);
-  }
+    const loaded = Object.keys(dotenvResult.parsed || {});
+    const set = loaded.filter((k) => process.env[k]);
+    const empty = loaded.filter((k) => !process.env[k]);
 
-  console.log('');
-});
+    console.log(`\nEnv vars loaded (${set.length}/${loaded.length} non-empty):`);
+    set.forEach((k) => console.log(`  ✓ ${k}`));
+    if (empty.length) {
+      console.log(`\nPresent but empty:`);
+      empty.forEach((k) => console.log(`  ○ ${k}`));
+    }
+
+    const critical = ['ANTHROPIC_API_KEY'];
+    const missing = critical.filter((k) => !process.env[k]);
+    if (missing.length) {
+      console.warn(`\n⚠  Missing critical keys: ${missing.join(', ')}`);
+    }
+
+    console.log('');
+  });
+}
+
+start();
