@@ -1,13 +1,28 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: command_center
+      POSTGRES_USER: cc
+      POSTGRES_PASSWORD: cc
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
   server:
     build:
       context: .
       dockerfile: Dockerfile
     env_file: .env
+    environment:
+      DATABASE_URL: postgres://cc:cc@postgres:5432/command_center
+    depends_on:
+      - postgres
     ports:
       - "3001:3001"
     volumes:
-      # Mount token files so OAuth state persists across container restarts
       - ./ms-token.json:/app/ms-token.json
       - ./google-credentials.json:/app/google-credentials.json
     restart: unless-stopped
@@ -21,3 +36,6 @@ services:
     depends_on:
       - server
     restart: unless-stopped
+
+volumes:
+  pgdata:
