@@ -307,6 +307,43 @@ export async function getLatestBriefingForDate(dateStr) {
   }
 }
 
+export async function listBriefings() {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) return [];
+
+  try {
+    const { results } = await notion.databases.query({
+      database_id: dbId,
+      filter: { property: 'title', title: { starts_with: 'Morning Brief · ' } },
+      sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+      page_size: 30,
+    });
+
+    return results.map((page) => {
+      const title = page.properties.title?.title?.map((t) => t.plain_text).join('') ?? '';
+      const date = title.replace('Morning Brief · ', '');
+      return { id: page.id, date, title };
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function getBriefingById(pageId) {
+  const notion = getNotionClient();
+  try {
+    const [page, { results: blocks }] = await Promise.all([
+      notion.pages.retrieve({ page_id: pageId }),
+      notion.blocks.children.list({ block_id: pageId }),
+    ]);
+    const content = reconstructBriefMarkdown(blocks);
+    return { id: page.id, content, createdAt: page.created_time };
+  } catch {
+    return null;
+  }
+}
+
 function briefMarkdownToBlocks(content) {
   const blocks = [];
   for (const line of content.split('\n')) {
