@@ -11,7 +11,8 @@
     "start": "docker start cc-pg; concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\" \"sleep 4 && NODE_ENV=development electron .\"",
     "electron:build": "npm run build && electron-builder",
     "docker:up": "docker-compose up --build",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "docker:restart": "docker-compose down && docker-compose up --build"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
