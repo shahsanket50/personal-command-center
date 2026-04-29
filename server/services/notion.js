@@ -317,7 +317,7 @@ export async function listBriefings() {
       database_id: dbId,
       filter: { property: 'title', title: { starts_with: 'Morning Brief · ' } },
       sorts: [{ timestamp: 'created_time', direction: 'descending' }],
-      page_size: 30,
+      page_size: 100,
     });
 
     return results.map((page) => {
