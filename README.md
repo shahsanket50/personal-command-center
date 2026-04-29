@@ -13,24 +13,83 @@ A local-first personal OS for an Engineering Manager. Pulls together Claude AI, 
 - **People** — team roster with 1:1 cadence status
 - **Settings** — API keys, OAuth, theme picker, MS bearer token
 
-All data lives in **PostgreSQL**. History, notes, tasks, digests, and conversations persist locally and survive restarts.
+All data lives in **PostgreSQL**. History, notes, tasks, digests, and conversations persist locally and survive restarts. Migrations run automatically on server startup.
 
 ---
 
 ## Ways to run
 
-### 1. Docker Compose (recommended for sharing / daily use)
+### 1. Electron menubar app — daily driver (macOS)
 
-One command starts everything — Postgres, Express API, and the React frontend served via nginx.
+Runs as a tray icon in the macOS menu bar. One command starts Postgres, the Express API, the Vite dev server, and the Electron window.
 
+**One-time setup:**
 ```bash
-# First time only — copy env template and fill in your keys
+# Create the Postgres container (once — data persists across restarts)
+docker run -d --name cc-pg \
+  -e POSTGRES_DB=command_center \
+  -e POSTGRES_USER=cc \
+  -e POSTGRES_PASSWORD=cc \
+  -p 5432:5432 postgres:16-alpine
+
 cp .env.example .env
 # edit .env with your API keys
 
-# Start
-docker-compose up --build
+npm install
+npm install --prefix server
+npm install --prefix client
+```
 
+**Every day:**
+```bash
+npm start
+```
+
+This starts the Postgres container, Express API, Vite dev server, and Electron window — in the right order. The tray icon appears in the macOS menu bar; click it to show/hide the window.
+
+To stop: right-click the tray icon → Quit (Postgres keeps running in the background — `docker stop cc-pg` to stop it too).
+
+---
+
+### 2. Browser (hot reload)
+
+No Electron, just the web UI at `http://localhost:5173`.
+
+**One-time setup:**
+```bash
+docker run -d --name cc-pg \
+  -e POSTGRES_DB=command_center \
+  -e POSTGRES_USER=cc \
+  -e POSTGRES_PASSWORD=cc \
+  -p 5432:5432 postgres:16-alpine
+
+cp .env.example .env
+# edit .env
+
+npm install
+npm install --prefix server
+npm install --prefix client
+```
+
+**Run:**
+```bash
+docker start cc-pg   # resume Postgres (skips if already running)
+npm run dev
+# Server: http://localhost:3001
+# Client: http://localhost:5173
+```
+
+---
+
+### 3. Docker Compose (self-contained / sharing)
+
+One command starts everything — Postgres, Express API, and the React frontend served via nginx. No Node install required on the host.
+
+```bash
+cp .env.example .env
+# edit .env with your API keys
+
+docker-compose up --build
 # App at http://localhost:5173
 # API at http://localhost:3001
 ```
@@ -44,79 +103,32 @@ Data persists in a Docker named volume (`pgdata`) across restarts.
 
 ---
 
-### 2. Local dev (hot reload)
-
-Requires Node 20+ and a local Postgres instance.
-
-```bash
-# 1. Start Postgres (Docker is easiest)
-docker run -d --name cc-pg \
-  -e POSTGRES_DB=command_center \
-  -e POSTGRES_USER=cc \
-  -e POSTGRES_PASSWORD=cc \
-  -p 5432:5432 postgres:16-alpine
-
-# 2. Set env vars
-cp .env.example .env
-# edit .env — DATABASE_URL is already set for the docker postgres above
-
-# 3. Create tables
-DATABASE_URL=postgres://cc:cc@localhost:5432/command_center node scripts/migrate.js
-
-# 4. Install dependencies
-npm install            # root (electron + concurrently)
-npm install --prefix server
-npm install --prefix client
-
-# 5. Start servers (hot reload on both)
-npm run dev
-# Server: http://localhost:3001
-# Client: http://localhost:5173
-```
-
----
-
-### 3. Electron menubar app (macOS tray)
-
-Runs as a tray icon in the macOS menu bar. Clicking the icon shows/hides the window. In dev mode it loads the Vite dev server; in production it loads the Express server directly.
-
-```bash
-# Dev mode (run alongside `npm run dev`)
-npm run electron:dev
-
-# Production build → .dmg
-npm run electron:build
-```
-
-Right-click the tray icon for: Show/Hide, Open Graph Explorer, Quit.
-
----
-
 ## First-time setup
 
-### 1. Database
-
-```bash
-# Run once — creates all 6 tables
-node scripts/migrate.js
-```
-
-### 2. API keys
+### 1. API keys
 
 Copy `.env.example` to `.env` and fill in:
 
 | Variable | Where to get it |
 |---|---|
-| `DATABASE_URL` | Already set for local Docker Postgres |
+| `DATABASE_URL` | Already set for the Docker Postgres above |
 | `ANTHROPIC_API_KEY` | console.anthropic.com |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud Console → OAuth 2.0 |
 | `SLACK_BOT_TOKEN` | api.slack.com → your app → OAuth Tokens |
+
+### 2. Database
+
+Tables are created automatically when the server starts. To run migrations manually (e.g. before first start):
+
+```bash
+node scripts/migrate.js
+```
 
 ### 3. Google OAuth (calendar + Gmail)
 
 1. Start the server
 2. Go to `http://localhost:5173/settings` → Accounts
-3. Click "Connect Google" — authorises calendar + Gmail in one flow
+3. Click "Connect Google" — authorises Calendar + Gmail in one flow
 4. Token saved to `google-credentials.json` (gitignored)
 
 ### 4. Microsoft 365 (calendar + email)
@@ -169,10 +181,10 @@ PORT=3001
 
 ```
 server/
-  index.js              — Express app, route registration
+  index.js              — Express app, auto-migration on startup, route registration
   routes/               — one file per feature area
   services/
-    db.js               — Postgres pool + all data access functions
+    db.js               — Postgres pool, runMigrations(), all data access functions
     claude.js           — Anthropic SDK streaming generators
     outlook.js          — Microsoft Graph (bearer token auth)
     gmail.js            — Gmail API
@@ -187,7 +199,7 @@ client/src/
   ThemeContext.jsx       — 5 themes: dark / light / paper / ocean / forest
 
 scripts/
-  migrate.js            — CREATE TABLE IF NOT EXISTS (safe to re-run)
+  migrate.js            — run migrations manually (safe to re-run)
   import-from-notion.js — one-time Notion → Postgres seeder
 
 electron/
