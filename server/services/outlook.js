@@ -1,126 +1,52 @@
-// Microsoft Graph service — office Outlook email + Outlook Calendar (Phase 3 & 6)
-// Auth: Azure AD OAuth2 via MSAL (@azure/msal-node)
-// Scope: Calendars.Read, Mail.Read, offline_access
-// Token stored in ms-token.json (gitignored)
+// Microsoft Graph service — bearer token auth (no Azure AD app registration required)
+// User obtains token from Graph Explorer and pastes into Settings.
+// Token stored in ms-token.json: { token: string, savedAt: ISO string }
 
-import { ConfidentialClientApplication } from '@azure/msal-node';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MS_TOKEN_PATH = path.resolve(__dirname, '../../ms-token.json');
-const REDIRECT_URI = 'http://localhost:3001/api/auth/microsoft/callback';
-const SCOPES = ['Calendars.Read', 'Mail.Read', 'offline_access'];
 
-export function getMSGraphConfig() {
-  const required = ['MS_CLIENT_ID', 'MS_CLIENT_SECRET', 'MS_TENANT_ID'];
-  for (const key of required) {
-    if (!process.env[key]) throw new Error(`${key} is not set`);
+export async function saveMSToken(token) {
+  await writeFile(MS_TOKEN_PATH, JSON.stringify({ token, savedAt: new Date().toISOString() }, null, 2));
+}
+
+export async function getMSTokenStatus() {
+  try {
+    const raw = await readFile(MS_TOKEN_PATH, 'utf8');
+    const { token, savedAt } = JSON.parse(raw);
+    if (!token) return { set: false, ageMinutes: 0, expired: true };
+    const ageMinutes = Math.floor((Date.now() - new Date(savedAt).getTime()) / 60000);
+    return { set: true, ageMinutes, expired: ageMinutes >= 60 };
+  } catch {
+    return { set: false, ageMinutes: 0, expired: true };
   }
-  return {
-    clientId: process.env.MS_CLIENT_ID,
-    clientSecret: process.env.MS_CLIENT_SECRET,
-    tenantId: process.env.MS_TENANT_ID,
-    account: process.env.MS_ACCOUNT_OFFICE,
-  };
-}
-
-function getMsalApp() {
-  const { clientId, clientSecret, tenantId } = getMSGraphConfig();
-  return new ConfidentialClientApplication({
-    auth: {
-      clientId,
-      clientSecret,
-      authority: `https://login.microsoftonline.com/${tenantId}`,
-    },
-  });
-}
-
-/** Returns the Azure AD auth URL to redirect the user to. */
-export async function getMSAuthUrl() {
-  const app = getMsalApp();
-  return app.getAuthCodeUrl({
-    scopes: SCOPES,
-    redirectUri: REDIRECT_URI,
-  });
-}
-
-/** Exchange auth code for tokens and persist to ms-token.json. */
-export async function handleMSCallback(code) {
-  const app = getMsalApp();
-  const result = await app.acquireTokenByCode({
-    code,
-    scopes: SCOPES,
-    redirectUri: REDIRECT_URI,
-  });
-
-  const msalCache = app.getTokenCache().serialize();
-  await writeFile(
-    MS_TOKEN_PATH,
-    JSON.stringify({ accessToken: result.accessToken, expiresOn: result.expiresOn, msalCache }, null, 2)
-  );
-
-  return result;
 }
 
 export async function isMSConnected() {
-  try {
-    await readFile(MS_TOKEN_PATH, 'utf8');
-    return true;
-  } catch {
-    return false;
-  }
+  const { set } = await getMSTokenStatus();
+  return set;
 }
 
-/**
- * Returns a valid access token, refreshing silently if needed.
- * Throws if the user has not connected or the token cannot be refreshed.
- */
 export async function getMSAccessToken() {
   let cached;
   try {
     const raw = await readFile(MS_TOKEN_PATH, 'utf8');
     cached = JSON.parse(raw);
   } catch {
-    throw new Error('Microsoft account not connected');
+    throw new Error('MS_NOT_CONNECTED');
   }
 
-  // Still valid with >5 min buffer
-  if (cached.accessToken && cached.expiresOn) {
-    const expiresOn = new Date(cached.expiresOn);
-    if (expiresOn.getTime() - Date.now() > 5 * 60 * 1000) {
-      return cached.accessToken;
-    }
-  }
+  if (!cached.token) throw new Error('MS_NOT_CONNECTED');
 
-  // Silent refresh using persisted MSAL cache
-  if (cached.msalCache) {
-    const app = getMsalApp();
-    app.getTokenCache().deserialize(cached.msalCache);
-    const accounts = await app.getTokenCache().getAllAccounts();
-    if (accounts.length > 0) {
-      const result = await app.acquireTokenSilent({
-        scopes: SCOPES,
-        account: accounts[0],
-      });
-      const msalCache = app.getTokenCache().serialize();
-      await writeFile(
-        MS_TOKEN_PATH,
-        JSON.stringify({ accessToken: result.accessToken, expiresOn: result.expiresOn, msalCache }, null, 2)
-      );
-      return result.accessToken;
-    }
-  }
+  const ageMinutes = Math.floor((Date.now() - new Date(cached.savedAt).getTime()) / 60000);
+  if (ageMinutes >= 60) throw new Error('MS_TOKEN_EXPIRED');
 
-  throw new Error('Microsoft token expired — please reconnect');
+  return cached.token;
 }
 
-/**
- * Fetch unread emails from the Office Outlook inbox via Microsoft Graph.
- * @param {{ maxResults?: number }} options
- * @returns {Promise<Array<{ id: string, subject: string, from: string, date: string, snippet: string, account: string, source: string }>>}
- */
 export async function fetchUnreadOutlookEmails({ maxResults = 30 } = {}) {
   const accessToken = await getMSAccessToken();
 
@@ -131,17 +57,12 @@ export async function fetchUnreadOutlookEmails({ maxResults = 30 } = {}) {
     `&$orderby=receivedDateTime%20desc` +
     `&$top=${maxResults}`;
 
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Microsoft Graph mail fetch failed (${res.status}): ${text}`);
-  }
+  if (res.status === 401) throw new Error('MS_TOKEN_EXPIRED');
+  if (!res.ok) throw new Error(`Microsoft Graph mail fetch failed (${res.status})`);
 
   const data = await res.json();
-
   return (data.value || []).map(msg => ({
     id: msg.id,
     subject: msg.subject || '(no subject)',

@@ -114,8 +114,9 @@ export async function getMSEvents(dateStr) {
   let accessToken;
   try {
     accessToken = await getMSAccessToken();
-  } catch {
-    return []; // not connected
+  } catch (e) {
+    // MS_NOT_CONNECTED or MS_TOKEN_EXPIRED — return empty silently
+    return [];
   }
 
   const startDateTime = `${dateStr}T00:00:00`;

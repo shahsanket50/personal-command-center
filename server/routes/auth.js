@@ -1,6 +1,5 @@
 import express from 'express';
 import { getGoogleAuthUrl, handleGoogleCallback } from '../services/calendar.js';
-import { getMSAuthUrl, handleMSCallback } from '../services/outlook.js';
 
 const router = express.Router();
 
@@ -28,28 +27,7 @@ router.get('/google/callback', async (req, res) => {
   }
 });
 
-// ─── Microsoft OAuth ──────────────────────────────────────────────────────────
-
-router.get('/microsoft', async (_req, res) => {
-  try {
-    const url = await getMSAuthUrl();
-    res.redirect(url);
-  } catch (e) {
-    res.status(500).send(`Microsoft OAuth not configured: ${e.message}`);
-  }
-});
-
-router.get('/microsoft/callback', async (req, res) => {
-  const { code, error } = req.query;
-  if (error || !code) {
-    return res.redirect('http://localhost:5173/calendar?auth=ms_error');
-  }
-  try {
-    await handleMSCallback(String(code));
-    res.redirect('http://localhost:5173/calendar?auth=ms_ok');
-  } catch {
-    res.redirect('http://localhost:5173/calendar?auth=ms_error');
-  }
-});
+// Microsoft auth is now bearer-token based (no OAuth callback needed).
+// Token is saved via POST /api/settings/ms-token.
 
 export default router;
