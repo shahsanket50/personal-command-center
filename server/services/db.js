@@ -239,3 +239,45 @@ export async function getTravelEntries() {
     endDate: r.end_date ? r.end_date.toISOString().slice(0, 10) : null,
   }));
 }
+
+// ─── People ──────────────────────────────────────────────────────────────────
+
+export async function getPeople() {
+  const { rows } = await query(
+    `SELECT id, name, role, team, last_1on1, notes FROM people ORDER BY name ASC`
+  );
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    role: r.role ?? '',
+    team: r.team ?? '',
+    initials: r.name.split(' ').map(w => w[0]).filter(Boolean).join('').slice(0, 2).toUpperCase(),
+    last1on1: r.last_1on1 ? r.last_1on1.toISOString().slice(0, 10) : null,
+    notes: r.notes ?? '',
+    ooo: false,
+  }));
+}
+
+export async function getPersonById(personId) {
+  const { rows } = await query(
+    `SELECT id, name, role, team, last_1on1, notes FROM people WHERE id = $1`,
+    [personId]
+  );
+  if (!rows.length) return null;
+  const r = rows[0];
+  return {
+    id: r.id,
+    name: r.name,
+    role: r.role ?? '',
+    team: r.team ?? '',
+    initials: r.name.split(' ').map(w => w[0]).filter(Boolean).join('').slice(0, 2).toUpperCase(),
+    last1on1: r.last_1on1 ? r.last_1on1.toISOString().slice(0, 10) : null,
+    notes: r.notes ?? '',
+    ooo: false,
+  };
+}
+
+export async function testConnection() {
+  const { rows } = await query('SELECT 1 AS ok');
+  return rows[0].ok === 1;
+}
