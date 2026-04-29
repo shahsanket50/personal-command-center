@@ -2,6 +2,7 @@ import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { saveMSToken, getMSTokenStatus } from '../services/outlook.js';
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -109,6 +110,41 @@ router.post('/', (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/settings/ms-token — save a new bearer token
+router.post('/ms-token', async (req, res) => {
+  const { token } = req.body;
+  if (!token || typeof token !== 'string' || !token.trim()) {
+    return res.status(400).json({ error: 'token is required' });
+  }
+  try {
+    await saveMSToken(token.trim());
+    const status = await getMSTokenStatus();
+    res.json({ ok: true, ...status });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DELETE /api/settings/ms-token — clear the token
+router.delete('/ms-token', async (_req, res) => {
+  try {
+    await saveMSToken('');
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/settings/ms-token/status — check token age and validity
+router.get('/ms-token/status', async (_req, res) => {
+  try {
+    const status = await getMSTokenStatus();
+    res.json(status);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
