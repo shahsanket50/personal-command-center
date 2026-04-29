@@ -17,6 +17,30 @@ function parseSections(text) {
   return sections;
 }
 
+function MsTokenBanner({ onDismiss }) {
+  const T = useTheme();
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '8px 14px', background: '#1a0e00',
+      border: `1px solid ${T.warn ?? T.danger}`, borderRadius: 4, margin: '8px 12px',
+      fontSize: 12, flexShrink: 0,
+    }}>
+      <span style={{ color: T.warn ?? T.danger }}>⚠</span>
+      <span style={{ color: T.warn ?? T.danger, flex: 1 }}>Microsoft token expired — office email unavailable</span>
+      <a
+        href="https://developer.microsoft.com/en-us/graph/graph-explorer"
+        target="_blank"
+        rel="noreferrer"
+        style={{ color: T.accent, textDecoration: 'none', fontSize: 12 }}
+      >
+        Get new token →
+      </a>
+      <button onClick={onDismiss} style={{ background: 'transparent', border: 'none', color: T.textGhost, cursor: 'pointer', fontSize: 13, padding: '0 2px' }}>✕</button>
+    </div>
+  );
+}
+
 const SECTION_LABELS = { 'Office Emails': '[o]', 'Personal Emails': '[p]', 'Email Insights': '[i]' };
 
 function SectionCard({ section }) {
@@ -44,6 +68,7 @@ export function EmailPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAt, setGeneratedAt] = useState(null);
   const [error, setError] = useState(null);
+  const [showMsBanner, setShowMsBanner] = useState(false);
   const abortRef = useRef(null);
 
   useEffect(() => {
@@ -96,7 +121,11 @@ export function EmailPage() {
           if (!line.startsWith('data:')) continue;
           const p = line.slice(5).trim();
           if (p === '[DONE]') break;
-          try { const { text } = JSON.parse(p); if (text) { acc += text; setSections(parseSections(acc)); } } catch { /* skip */ }
+          try {
+            const payload = JSON.parse(p);
+            if (payload.text) { acc += payload.text; setSections(parseSections(acc)); }
+            if (payload.msError) { setShowMsBanner(true); }
+          } catch { /* skip */ }
         }
       }
       setGeneratedAt(new Date().toLocaleTimeString());
@@ -127,6 +156,7 @@ export function EmailPage() {
   return (
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
       <style>{`@keyframes mc-skeleton-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
+      {showMsBanner && <MsTokenBanner onDismiss={() => setShowMsBanner(false)} />}
       <Panel title="email_triage" right={headerRight}>
         <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
           {error && <div style={{ color: T.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}

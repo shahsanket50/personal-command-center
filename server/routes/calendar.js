@@ -1,6 +1,6 @@
 import express from 'express';
-import { getMergedEvents, isGoogleConnected } from '../services/calendar.js';
-import { isMSConnected } from '../services/outlook.js';
+import { getMergedEvents, getGoogleEvents, getMSEvents, isGoogleConnected } from '../services/calendar.js';
+import { isMSConnected, getMSAccessToken } from '../services/outlook.js';
 import { getTravelEntries } from '../services/notion.js';
 
 const router = express.Router();
@@ -21,8 +21,29 @@ router.get('/events', async (req, res) => {
     return res.status(400).json({ error: 'date must be YYYY-MM-DD' });
   }
   try {
-    const events = await getMergedEvents(dateStr);
-    res.json(events);
+    let msError = false;
+    // Check MS token status before merging — getMSEvents swallows errors silently
+    await getMSAccessToken().catch(e => {
+      if (e.message === 'MS_TOKEN_EXPIRED' || e.message === 'MS_NOT_CONNECTED') {
+        msError = true;
+      } else {
+        throw e;
+      }
+    });
+
+    const [googleEvents, msEvents] = await Promise.all([
+      getGoogleEvents(dateStr).catch(() => []),
+      msError ? [] : getMSEvents(dateStr).catch(() => []),
+    ]);
+
+    const events = [...googleEvents, ...msEvents];
+    events.sort((a, b) => {
+      if (a.allDay && !b.allDay) return -1;
+      if (!a.allDay && b.allDay) return 1;
+      return new Date(a.start) - new Date(b.start);
+    });
+
+    res.json({ events, msError });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

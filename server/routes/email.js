@@ -40,6 +40,7 @@ router.post('/digest/generate', async (_req, res) => {
   try {
     const today = new Date().toISOString().split('T')[0];
 
+    let msTokenExpired = false;
     const [gmailEmails, outlookEmails] = await Promise.all([
       fetchUnreadGmailEmails({ maxResults: 25 }).catch(e => {
         console.error('[email] Gmail fetch failed:', e.message);
@@ -47,9 +48,16 @@ router.post('/digest/generate', async (_req, res) => {
       }),
       fetchUnreadOutlookEmails({ maxResults: 25 }).catch(e => {
         console.error('[email] Outlook fetch failed:', e.message);
+        if (e.message === 'MS_TOKEN_EXPIRED' || e.message === 'MS_NOT_CONNECTED') {
+          msTokenExpired = true;
+        }
         return [];
       }),
     ]);
+
+    if (msTokenExpired) {
+      res.write(`data: ${JSON.stringify({ msError: true })}\n\n`);
+    }
 
     let fullContent = '';
     for await (const text of generateEmailDigest({ date: today, gmailEmails, outlookEmails })) {

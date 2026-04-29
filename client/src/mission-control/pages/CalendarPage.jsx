@@ -4,6 +4,30 @@ import { Panel } from '../components/Panel.jsx';
 
 const API = 'http://localhost:3001/api';
 
+function MsTokenBanner({ onDismiss }) {
+  const T = useTheme();
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '8px 14px', background: '#1a0e00',
+      border: `1px solid ${T.warn ?? T.danger}`, borderRadius: 4, margin: '8px 12px',
+      fontSize: 12, flexShrink: 0,
+    }}>
+      <span style={{ color: T.warn ?? T.danger }}>⚠</span>
+      <span style={{ color: T.warn ?? T.danger, flex: 1 }}>Microsoft token expired — office calendar unavailable</span>
+      <a
+        href="https://developer.microsoft.com/en-us/graph/graph-explorer"
+        target="_blank"
+        rel="noreferrer"
+        style={{ color: T.accent, textDecoration: 'none', fontSize: 12 }}
+      >
+        Get new token →
+      </a>
+      <button onClick={onDismiss} style={{ background: 'transparent', border: 'none', color: T.textGhost, cursor: 'pointer', fontSize: 13, padding: '0 2px' }}>✕</button>
+    </div>
+  );
+}
+
 function fmtDate(d) { return d.toISOString().split('T')[0]; }
 function dateLabel(d) { return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }); }
 function nowFrac(date) {
@@ -19,6 +43,7 @@ export function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [status, setStatus] = useState({ google: null, microsoft: null });
   const [expanded, setExpanded] = useState(null);
+  const [showMsBanner, setShowMsBanner] = useState(false);
 
   useEffect(() => {
     fetch(`${API}/calendar/status`).then(r => r.json()).then(setStatus).catch(() => {});
@@ -27,7 +52,15 @@ export function CalendarPage() {
   useEffect(() => {
     fetch(`${API}/calendar/events?date=${fmtDate(date)}`)
       .then(r => r.json())
-      .then(data => setEvents(Array.isArray(data) ? data : []))
+      .then(data => {
+        if (data && typeof data === 'object' && 'events' in data) {
+          setEvents(Array.isArray(data.events) ? data.events : []);
+          if (data.msError) setShowMsBanner(true);
+        } else {
+          // fallback for legacy array response
+          setEvents(Array.isArray(data) ? data : []);
+        }
+      })
       .catch(() => setEvents([]));
   }, [date]);
 
@@ -57,6 +90,7 @@ export function CalendarPage() {
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
+      {showMsBanner && <MsTokenBanner onDismiss={() => setShowMsBanner(false)} />}
       <Panel title="calendar" right={headerRight}>
         {connectWarning && (
           <div style={{ padding: '6px 12px', background: T.bg3, color: T.warn, fontSize: 12.5, borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
