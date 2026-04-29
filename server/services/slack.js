@@ -5,6 +5,18 @@ export function getSlackClient() {
   return new WebClient(process.env.SLACK_BOT_TOKEN);
 }
 
+export function getSlackUserClient() {
+  if (!process.env.SLACK_USER_TOKEN) throw new Error('SLACK_USER_TOKEN is not set');
+  return new WebClient(process.env.SLACK_USER_TOKEN);
+}
+
+// Returns user client if available, falls back to bot client
+function getClient() {
+  return process.env.SLACK_USER_TOKEN
+    ? getSlackUserClient()
+    : getSlackClient();
+}
+
 export function getBlacklist() {
   return (process.env.SLACK_BLACKLIST_CHANNELS || '').split(',').filter(Boolean);
 }
@@ -15,7 +27,7 @@ export async function getAuthInfo() {
 }
 
 export async function getJoinedChannels() {
-  const client = getSlackClient();
+  const client = getClient();
   const blacklist = getBlacklist();
 
   const [convResult, imResult] = await Promise.all([
@@ -44,7 +56,7 @@ export async function getJoinedChannels() {
 }
 
 export async function getChannelMessagesLast24h(channelId) {
-  const client = getSlackClient();
+  const client = getClient();
   const oldest = String(Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000));
 
   try {
@@ -55,7 +67,6 @@ export async function getChannelMessagesLast24h(channelId) {
     });
     return result.messages || [];
   } catch (err) {
-    // Bot not in channel — skip silently
     if (err.data?.error === 'not_in_channel') return [];
     throw err;
   }
