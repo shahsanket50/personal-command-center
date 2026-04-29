@@ -102,7 +102,8 @@ Mission Control revamp complete — 3-pivot keyboard-first terminal interface re
   New routes: GET /api/triage/items (Slack+Email+Cal classify), GET /api/people (Notion People DB).
 MC Navigation & Module Pages complete — three-row top bar, URL-based pivot routing, 8 MC-native full-page module routes (/notes /calendar /claude /brief /slack /email /settings /goals), task interactivity (toggle/delete) in Today panel TaskList, panel view-all click-throughs.
 Font size + theme system complete — 5 named themes (dark/light/paper/ocean/forest), React context via ThemeProvider/useTheme(), Settings Appearance tab with swatch picker, localStorage persistence, +2px font scale across all MC files, accent prop removed from all call sites.
-Next: Phase 7 — People & 1:1s deep dive (talking points, activity merge, claude prep streaming).
+Spec B complete — Brief history sidebar (browse past briefs by date) and Claude session history (load + continue past sessions) added to MC pages.
+Next: Spec C — Microsoft bearer token.
 
 ## Backlog (deferred cleanup)
 - Remove `client/src/modules/` entirely once all MC pages (`client/src/mission-control/pages/`) are stable and verified. Old modules are no longer routed but kept as reference during the migration.
