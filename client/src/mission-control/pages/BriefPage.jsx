@@ -42,31 +42,87 @@ function SectionCard({ section }) {
   );
 }
 
+function HistorySidebar({ history, activeId, onSelect }) {
+  const T = useTheme();
+  return (
+    <div style={{ width: 140, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto' }}>
+      <div style={{ fontSize: 11, color: T.textGhost, padding: '8px 10px 6px', letterSpacing: '.08em' }}>history</div>
+      {history.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => onSelect(item)}
+          style={{
+            background: activeId === item.id ? T.bg2 : 'transparent',
+            border: 'none',
+            borderLeft: `2px solid ${activeId === item.id ? T.accent : 'transparent'}`,
+            color: activeId === item.id ? T.textHi : T.textDim,
+            cursor: 'pointer',
+            fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
+            fontSize: 11,
+            padding: '6px 10px',
+            textAlign: 'left',
+            width: '100%',
+          }}
+        >
+          {item.date}
+        </button>
+      ))}
+      {history.length === 0 && (
+        <div style={{ fontSize: 11, color: T.textGhost, padding: '6px 10px' }}>no history</div>
+      )}
+    </div>
+  );
+}
+
 export function BriefPage() {
   const T = useTheme();
   const [sections, setSections] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedAt, setGeneratedAt] = useState(null);
   const [error, setError] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [activeId, setActiveId] = useState(null);
   const abortRef = useRef(null);
 
   useEffect(() => {
+    fetchHistory();
     fetchCached();
     return () => abortRef.current?.abort();
   }, []);
 
+  async function fetchHistory() {
+    try {
+      const res = await fetch(`${API}/brief/history`);
+      if (res.ok) setHistory(await res.json());
+    } catch { /* non-fatal */ }
+  }
+
   async function fetchCached() {
     try {
       const res = await fetch(`${API}/brief/today`);
-      if (res.status === 404 || !res.ok) { return; } // no brief yet, user can click Refresh
+      if (res.status === 404 || !res.ok) return;
       const data = await res.json();
       if (data?.content) {
         setSections(parseSections(data.content));
+        setActiveId(data.id ?? null);
         setGeneratedAt(new Date().toLocaleTimeString());
       }
-      // 200 but no content → show empty state, do not auto-generate
     } catch (e) {
-      setError(e.message); // show error, do not call generate()
+      setError(e.message);
+    }
+  }
+
+  async function loadBrief(item) {
+    setActiveId(item.id);
+    setSections([]);
+    setError(null);
+    try {
+      const res = await fetch(`${API}/brief/${item.id}`);
+      if (!res.ok) throw new Error('failed to load');
+      const data = await res.json();
+      if (data?.content) setSections(parseSections(data.content));
+    } catch (e) {
+      setError(e.message);
     }
   }
 
@@ -89,6 +145,7 @@ export function BriefPage() {
         }
       }
       setGeneratedAt(new Date().toLocaleTimeString());
+      fetchHistory(); // refresh sidebar after generating new brief
     } catch (e) {
       if (e.name !== 'AbortError') setError(e.message);
     } finally { setIsGenerating(false); }
@@ -112,10 +169,13 @@ export function BriefPage() {
           </div>
         }
       >
-        <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
-          {error && <div style={{ color: T.danger, fontSize: 13, marginBottom: 12 }}>{error}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {isGenerating && sections.length === 0 ? skeleton : sections.map((s) => <SectionCard key={s.heading} section={s} />)}
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          <HistorySidebar history={history} activeId={activeId} onSelect={loadBrief} />
+          <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
+            {error && <div style={{ color: T.danger, fontSize: 13, marginBottom: 12 }}>{error}</div>}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {isGenerating && sections.length === 0 ? skeleton : sections.map((s) => <SectionCard key={s.heading} section={s} />)}
+            </div>
           </div>
         </div>
       </Panel>
