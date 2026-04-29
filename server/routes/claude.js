@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { streamChat } from '../services/claude.js';
-import { saveConversation } from '../services/notion.js';
+import { saveConversation, listConversations, getConversationById } from '../services/notion.js';
 
 const router = Router();
 
@@ -54,6 +54,27 @@ router.post('/save', async (req, res) => {
     res.json({ ok: true, title: pageTitle });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// GET /api/claude/sessions — list all saved Claude CLI sessions
+router.get('/sessions', async (_req, res) => {
+  try {
+    const sessions = await listConversations();
+    res.json(sessions);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/claude/sessions/:id — fetch full messages for a session
+router.get('/sessions/:id', async (req, res) => {
+  try {
+    const session = await getConversationById(req.params.id);
+    if (!session) return res.status(404).json({ error: 'not found' });
+    res.json(session);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
