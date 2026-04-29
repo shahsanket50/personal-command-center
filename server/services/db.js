@@ -128,3 +128,114 @@ export async function getConversationById(id) {
   try { messages = JSON.parse(rows[0].content); } catch { messages = []; }
   return { id: rows[0].id, title: rows[0].title, messages };
 }
+
+// ─── Tasks ───────────────────────────────────────────────────────────────────
+
+export async function getTasks() {
+  const { rows } = await query(
+    `SELECT id, name, status, due_date FROM tasks ORDER BY created_at DESC`
+  );
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    status: r.status,
+    dueDate: r.due_date ? r.due_date.toISOString().slice(0, 10) : null,
+  }));
+}
+
+export async function getOverdueTasks() {
+  const { rows } = await query(
+    `SELECT id, name, status, due_date FROM tasks
+     WHERE status != 'Done' AND due_date < CURRENT_DATE
+     ORDER BY due_date ASC`
+  );
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    status: r.status,
+    dueDate: r.due_date.toISOString().slice(0, 10),
+  }));
+}
+
+export async function getDueTodayTasks(dateStr) {
+  const { rows } = await query(
+    `SELECT id, name, status, due_date FROM tasks
+     WHERE status != 'Done' AND due_date = $1
+     ORDER BY created_at ASC`,
+    [dateStr]
+  );
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    status: r.status,
+    dueDate: r.due_date.toISOString().slice(0, 10),
+  }));
+}
+
+export async function createTask(title, dueDate) {
+  const { rows } = await query(
+    `INSERT INTO tasks (name, due_date) VALUES ($1, $2) RETURNING id`,
+    [title, dueDate || null]
+  );
+  return rows[0].id;
+}
+
+export async function updateTask(taskId, updates) {
+  const fields = [];
+  const values = [];
+  let i = 1;
+  if (updates.status !== undefined) { fields.push(`status = $${i++}`); values.push(updates.status); }
+  if (updates.dueDate !== undefined) { fields.push(`due_date = $${i++}`); values.push(updates.dueDate); }
+  if (!fields.length) return;
+  values.push(taskId);
+  await query(`UPDATE tasks SET ${fields.join(', ')} WHERE id = $${i}`, values);
+}
+
+export async function deleteTask(taskId) {
+  await query(`DELETE FROM tasks WHERE id = $1`, [taskId]);
+}
+
+// ─── Daily Notes ─────────────────────────────────────────────────────────────
+
+export async function getDailyNote(dateStr) {
+  const { rows } = await query(
+    `SELECT id, content FROM daily_briefings WHERE date = $1 AND type = 'daily_note' LIMIT 1`,
+    [dateStr]
+  );
+  if (rows.length) return { id: rows[0].id, content: rows[0].content };
+
+  // Create if not exists
+  const insert = await query(
+    `INSERT INTO daily_briefings (date, type, title, content)
+     VALUES ($1, 'daily_note', $2, '') RETURNING id`,
+    [dateStr, `Daily Note · ${dateStr}`]
+  );
+  return { id: insert.rows[0].id, content: '' };
+}
+
+export async function saveDailyNote(noteId, content) {
+  await query(`UPDATE daily_briefings SET content = $1 WHERE id = $2`, [content, noteId]);
+}
+
+// ─── Action Items ────────────────────────────────────────────────────────────
+
+export async function saveActionItems(items) {
+  if (!items.length) return;
+  const values = items.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`).join(', ');
+  const params = items.flatMap(item => [item.text || item.name, item.source || null]);
+  await query(`INSERT INTO action_items (name, source) VALUES ${values}`, params);
+}
+
+// ─── Travel Bookings ─────────────────────────────────────────────────────────
+
+export async function getTravelEntries() {
+  const { rows } = await query(
+    `SELECT id, name, start_date, end_date FROM travel_bookings ORDER BY start_date ASC`
+  );
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    startDate: r.start_date ? r.start_date.toISOString().slice(0, 10) : null,
+    endDate: r.end_date ? r.end_date.toISOString().slice(0, 10) : null,
+  }));
+}
