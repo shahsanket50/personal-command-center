@@ -63,7 +63,7 @@ export function Schedule() {
     const today = new Date().toISOString().split('T')[0];
     fetch(`${API}/calendar/events?date=${today}`)
       .then(r => r.json())
-      .then(data => setEvents(Array.isArray(data) ? data : []))
+      .then(data => setEvents(Array.isArray(data) ? data : Array.isArray(data?.events) ? data.events : []))
       .catch(() => {});
   }, []);
 
