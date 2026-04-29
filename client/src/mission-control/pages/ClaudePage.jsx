@@ -220,7 +220,7 @@ export function ClaudePage() {
     setInput('');
     setIsStreaming(false);
     setSaveStatus('');
-    setActiveSessionTitle(session.title.replace('Claude CLI · ', '').slice(0, 30));
+    setActiveSessionTitle(session.title.replace('Claude CLI · ', '').slice(0, 22));
     try {
       const res = await fetch(`${API}/claude/sessions/${session.id}`);
       if (!res.ok) throw new Error('failed to load');
