@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { testConnection } from '../services/notion.js';
+import { testConnection } from '../services/db.js';
 
 const router = Router();
 

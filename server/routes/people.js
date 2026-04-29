@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getPeople, getPersonById } from '../services/notion.js';
+import { getPeople, getPersonById } from '../services/db.js';
 
 const router = Router();
 

@@ -9,7 +9,7 @@ import {
   saveEmailDigest,
   getLatestEmailDigestForDate,
   saveActionItems,
-} from '../services/notion.js';
+} from '../services/db.js';
 
 const router = Router();
 const __dirname = dirname(fileURLToPath(import.meta.url));

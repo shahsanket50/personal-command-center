@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { streamChat } from '../services/claude.js';
-import { saveConversation, listConversations, getConversationById } from '../services/notion.js';
+import { saveConversation, listConversations, getConversationById } from '../services/db.js';
 
 const router = Router();
 

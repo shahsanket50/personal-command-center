@@ -1,7 +1,7 @@
 import express from 'express';
 import { getMergedEvents, getGoogleEvents, getMSEvents, isGoogleConnected } from '../services/calendar.js';
 import { isMSConnected, getMSAccessToken } from '../services/outlook.js';
-import { getTravelEntries } from '../services/notion.js';
+import { getTravelEntries } from '../services/db.js';
 
 const router = express.Router();
 

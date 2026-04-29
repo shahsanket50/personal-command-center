@@ -8,7 +8,7 @@ import {
   getLatestBriefingForDate,
   listBriefings,
   getBriefingById,
-} from '../services/notion.js';
+} from '../services/db.js';
 import { generateMorningBrief } from '../services/claude.js';
 
 const router = Router();
