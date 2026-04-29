@@ -45,6 +45,15 @@ app.use('/api/people', peopleRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
+// Production: serve built client files
+if (process.env.NODE_ENV === 'production') {
+  const clientDist = new URL('../client/dist', import.meta.url).pathname;
+  app.use(express.static(clientDist));
+  app.get('*', (_req, res) => {
+    res.sendFile(new URL('../client/dist/index.html', import.meta.url).pathname);
+  });
+}
+
 app.listen(PORT, () => {
   console.log(`\nServer running on http://localhost:${PORT}`);
   console.log(`Loading .env from: ${envPath}`);
