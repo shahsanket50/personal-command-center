@@ -53,6 +53,35 @@ function MessageBubble({ msg, isStreaming }) {
   );
 }
 
+function SessionSidebar({ sessions, onNew, onLoad }) {
+  const T = useTheme();
+  return (
+    <div style={{ width: 150, borderRight: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
+      <button
+        onClick={onNew}
+        style={{ background: T.bg2, border: 'none', borderBottom: `1px solid ${T.border}`, color: T.accent, cursor: 'pointer', fontSize: 11, padding: '8px 10px', textAlign: 'left', fontFamily: 'inherit' }}
+      >
+        + new chat
+      </button>
+      {sessions.map((s) => (
+        <button
+          key={s.id}
+          onClick={() => onLoad(s)}
+          style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${T.bg2}`, color: T.textDim, cursor: 'pointer', fontFamily: 'inherit', fontSize: 11, padding: '6px 10px', textAlign: 'left', width: '100%' }}
+        >
+          <div style={{ color: T.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {s.title.replace('Claude CLI · ', '').slice(0, 22)}
+          </div>
+          <div style={{ color: T.textGhost, fontSize: 10, marginTop: 2 }}>{s.date}</div>
+        </button>
+      ))}
+      {sessions.length === 0 && (
+        <div style={{ fontSize: 11, color: T.textGhost, padding: '8px 10px' }}>no sessions</div>
+      )}
+    </div>
+  );
+}
+
 export function ClaudePage() {
   const T = useTheme();
   const hdrBtn = { background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 3, color: T.textDim, cursor: 'pointer', fontSize: 12, padding: '3px 8px', fontFamily: 'ui-monospace, Menlo, monospace' };
@@ -63,6 +92,8 @@ export function ClaudePage() {
   const [saveStatus, setSaveStatus] = useState('');
   const [history, setHistory] = useState([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
+  const [sessions, setSessions] = useState([]);
+  const [activeSessionTitle, setActiveSessionTitle] = useState(null);
   const abortRef = useRef(null);
   const bottomRef = useRef(null);
   const autoSubmitted = useRef(false);
@@ -77,6 +108,13 @@ export function ClaudePage() {
   }, []);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  useEffect(() => {
+    fetch(`${API}/claude/sessions`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setSessions)
+      .catch(() => {});
+  }, []);
 
   const sendMessage = useCallback(async (text) => {
     const prompt = (typeof text === 'string' ? text : inputRef.current).trim();
@@ -167,47 +205,79 @@ export function ClaudePage() {
 
   const exchangeCount = Math.floor(messages.length / 2);
 
+  function handleNewChat() {
+    abortRef.current?.abort();
+    setMessages([]);
+    setInput('');
+    setIsStreaming(false);
+    setActiveSessionTitle(null);
+    setSaveStatus('');
+  }
+
+  async function handleLoadSession(session) {
+    abortRef.current?.abort();
+    setMessages([]);
+    setInput('');
+    setIsStreaming(false);
+    setSaveStatus('');
+    setActiveSessionTitle(session.title.replace('Claude CLI · ', '').slice(0, 30));
+    try {
+      const res = await fetch(`${API}/claude/sessions/${session.id}`);
+      if (!res.ok) throw new Error('failed to load');
+      const data = await res.json();
+      if (data?.messages) setMessages(data.messages);
+    } catch {
+      setActiveSessionTitle(null);
+    }
+  }
+
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 16px', background: T.bg1, borderBottom: `1px solid ${T.border}`, flexShrink: 0, fontSize: 12.5 }}>
-        <span style={{ color: T.accent }}>$ claude-chat</span>
-        <span style={{ color: T.textGhost }}>claude-sonnet-4-5</span>
-        <span style={{ color: T.textFaint }}>{exchangeCount} exchanges</span>
-        <div style={{ flex: 1 }} />
-        {saveStatus && <span style={{ color: saveStatus === 'error' ? T.danger : T.textDim, fontSize: 12 }}>{saveStatus}</span>}
-        <button onClick={handleSave} style={hdrBtn}>Save to Notion</button>
-        <button onClick={() => { abortRef.current?.abort(); setMessages([]); setHistoryIdx(-1); }} style={hdrBtn}>Clear</button>
-      </div>
+    <div style={{ flex: 1, display: 'flex', overflow: 'hidden', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace' }}>
+      <SessionSidebar sessions={sessions} onNew={handleNewChat} onLoad={handleLoadSession} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 16px', background: T.bg1, borderBottom: `1px solid ${T.border}`, flexShrink: 0, fontSize: 12.5 }}>
+          <span style={{ color: T.accent }}>$ claude-chat</span>
+          {activeSessionTitle
+            ? <span style={{ color: T.info, fontSize: 11.5 }}>↩ continuing · {activeSessionTitle}</span>
+            : <span style={{ color: T.textGhost }}>claude-sonnet-4-5</span>
+          }
+          <span style={{ color: T.textFaint }}>{exchangeCount} exchanges</span>
+          <div style={{ flex: 1 }} />
+          {saveStatus && <span style={{ color: saveStatus === 'error' ? T.danger : T.textDim, fontSize: 12 }}>{saveStatus}</span>}
+          <button onClick={handleSave} style={hdrBtn}>Save to Notion</button>
+          <button onClick={handleNewChat} style={hdrBtn}>Clear</button>
+        </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', background: T.bg0 }}>
-        {messages.length === 0 && (
-          <div style={{ padding: '48px 24px', textAlign: 'center', color: T.textGhost, fontSize: 14 }}>
-            $ ask anything \u2014 \u2191\u2193 history \u00b7 Ctrl+C abort
-          </div>
-        )}
-        {messages.map((m, i) => (
-          <MessageBubble key={i} msg={m} isStreaming={isStreaming && i === messages.length - 1 && m.role === 'assistant'} />
-        ))}
-        <div ref={bottomRef} />
-      </div>
+        <div style={{ flex: 1, overflowY: 'auto', background: T.bg0 }}>
+          {messages.length === 0 && (
+            <div style={{ padding: '48px 24px', textAlign: 'center', color: T.textGhost, fontSize: 14 }}>
+              $ ask anything \u2014 \u2191\u2193 history \u00b7 Ctrl+C abort
+            </div>
+          )}
+          {messages.map((m, i) => (
+            <MessageBubble key={i} msg={m} isStreaming={isStreaming && i === messages.length - 1 && m.role === 'assistant'} />
+          ))}
+          <div ref={bottomRef} />
+        </div>
 
-      <div style={{ display: 'flex', gap: 8, padding: '8px 16px', background: T.bg1, borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
-        <span style={{ color: T.accent, fontSize: 15, alignSelf: 'center' }}>{'>'}</span>
-        <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          rows={1}
-          placeholder="ask something\u2026 (Enter to send, Shift+Enter newline)"
-          style={{ flex: 1, background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontSize: 14.5, padding: '6px 10px', outline: 'none', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5 }}
-        />
-        <button
-          onClick={() => sendMessage()}
-          disabled={isStreaming || !input.trim()}
-          style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 4, color: T.accent, cursor: 'pointer', fontSize: 13, padding: '0 12px', alignSelf: 'stretch', opacity: (isStreaming || !input.trim()) ? 0.4 : 1 }}
-        >
-          {isStreaming ? '\u2026' : '\u23ce'}
-        </button>
+        <div style={{ display: 'flex', gap: 8, padding: '8px 16px', background: T.bg1, borderTop: `1px solid ${T.border}`, flexShrink: 0 }}>
+          <span style={{ color: T.accent, fontSize: 15, alignSelf: 'center' }}>{'>'}</span>
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            placeholder="ask something\u2026 (Enter to send, Shift+Enter newline)"
+            style={{ flex: 1, background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 4, color: T.text, fontSize: 14.5, padding: '6px 10px', outline: 'none', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5 }}
+          />
+          <button
+            onClick={() => sendMessage()}
+            disabled={isStreaming || !input.trim()}
+            style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 4, color: T.accent, cursor: 'pointer', fontSize: 13, padding: '0 12px', alignSelf: 'stretch', opacity: (isStreaming || !input.trim()) ? 0.4 : 1 }}
+          >
+            {isStreaming ? '\u2026' : '\u23ce'}
+          </button>
+        </div>
       </div>
     </div>
   );
