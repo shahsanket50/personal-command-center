@@ -12,9 +12,7 @@ const FIELDS = {
     { key: 'SLACK_BOT_TOKEN',      label: 'Slack Bot Token',         secret: true,  placeholder: 'xoxb-...' },
     { key: '_section_ms',          label: 'Microsoft 365 (Office)',  type: 'section' },
     { key: 'MS_ACCOUNT_OFFICE',    label: 'Office Email',            secret: false, placeholder: 'you@company.com' },
-    { key: 'MS_TENANT_ID',         label: 'Azure AD Tenant ID',      secret: false, placeholder: 'xxxxxxxx-...' },
-    { key: 'MS_CLIENT_ID',         label: 'Azure App Client ID',     secret: true,  placeholder: 'xxxxxxxx-...' },
-    { key: 'MS_CLIENT_SECRET',     label: 'Azure App Client Secret', secret: true,  placeholder: '...' },
+    { key: '_ms_token',            type: 'ms_token' },
     { key: '_section_google',      label: 'Google (Personal)',       type: 'section' },
     { key: 'GMAIL_ACCOUNT_PERSONAL', label: 'Personal Gmail',        secret: false, placeholder: 'you@gmail.com' },
     { key: 'GOOGLE_CLIENT_ID',     label: 'Google Client ID',        secret: true,  placeholder: '....apps.googleusercontent.com' },
@@ -70,11 +68,20 @@ export function SettingsPage() {
   const [saveStatus, setSaveStatus] = useState('');
   const [notionTest, setNotionTest] = useState(null);
   const notionTestTimerRef = useRef(null);
+  const [msToken, setMsToken] = useState('');
+  const [msTokenStatus, setMsTokenStatus] = useState(null); // { set, ageMinutes, expired }
 
   useEffect(() => {
     fetch(`${API}/settings`).then(r => r.json()).then(data => {
       setValues(data.values ?? {});
     }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API}/settings/ms-token/status`)
+      .then(r => r.ok ? r.json() : null)
+      .then(setMsTokenStatus)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -102,6 +109,28 @@ export function SettingsPage() {
     notionTestTimerRef.current = setTimeout(() => setNotionTest(null), 4000);
   }
 
+  async function saveMsToken() {
+    if (!msToken.trim()) return;
+    try {
+      const res = await fetch(`${API}/settings/ms-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: msToken.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMsTokenStatus(data);
+        setMsToken('');
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function clearMsToken() {
+    await fetch(`${API}/settings/ms-token`, { method: 'DELETE' });
+    setMsTokenStatus({ set: false, ageMinutes: 0, expired: true });
+    setMsToken('');
+  }
+
   const fields = FIELDS[activeTab] ?? [];
 
   return (
@@ -122,6 +151,51 @@ export function SettingsPage() {
             if (f.type === 'section') return (
               <div key={f.key} style={{ fontSize: 11, letterSpacing: '.1em', color: T.textGhost, marginTop: 20, marginBottom: 10, paddingTop: 10, borderTop: `1px solid ${T.border}` }}>
                 {f.label.toUpperCase()}
+              </div>
+            );
+            if (f.type === 'ms_token') return (
+              <div key={f.key} style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 12, color: T.textDim, marginBottom: 8 }}>
+                  Calendar and email — paste a bearer token from Graph Explorer. Lasts ~1 hour.
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                  <input
+                    type="password"
+                    value={msToken}
+                    onChange={e => setMsToken(e.target.value)}
+                    placeholder={msTokenStatus?.set ? '••••••••' : 'paste token here…'}
+                    style={{ flex: 1, background: T.bg2, border: `1px solid ${T.border}`, borderRadius: 3, color: T.text, fontSize: 12, padding: '5px 8px', outline: 'none', fontFamily: 'inherit' }}
+                    onKeyDown={e => e.key === 'Enter' && saveMsToken()}
+                  />
+                  <button onClick={saveMsToken} disabled={!msToken.trim()} style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 3, color: T.accent, cursor: 'pointer', fontSize: 12, padding: '4px 10px', opacity: msToken.trim() ? 1 : 0.4 }}>
+                    save
+                  </button>
+                  {msTokenStatus?.set && (
+                    <button onClick={clearMsToken} style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 3, color: T.textDim, cursor: 'pointer', fontSize: 12, padding: '4px 10px' }}>
+                      clear
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: msTokenStatus?.expired ? T.warn : msTokenStatus?.set ? T.accent : T.textGhost }}>
+                    {!msTokenStatus?.set
+                      ? '✕ not set'
+                      : msTokenStatus.expired
+                        ? '⚠ expired — paste a new token'
+                        : msTokenStatus.ageMinutes > 50
+                          ? `⚠ expires soon · ${msTokenStatus.ageMinutes} min ago`
+                          : `● set · ${msTokenStatus.ageMinutes} min ago`
+                    }
+                  </span>
+                  <a
+                    href="https://developer.microsoft.com/en-us/graph/graph-explorer"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: 11, color: T.accent, textDecoration: 'none' }}
+                  >
+                    Get token from Graph Explorer →
+                  </a>
+                </div>
               </div>
             );
             return <SecretField key={f.key} field={f} value={values[f.key] ?? ''} onChange={handleChange} />;
