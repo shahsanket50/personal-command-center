@@ -65,6 +65,65 @@ export async function saveConversation(title, messages) {
   });
 }
 
+export async function listConversations() {
+  const notion = getNotionClient();
+  const dbId = process.env.NOTION_DB_DAILY_BRIEFINGS;
+  if (!dbId) return [];
+
+  try {
+    const { results } = await notion.databases.query({
+      database_id: dbId,
+      filter: { property: 'title', title: { starts_with: 'Claude CLI · ' } },
+      sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+      page_size: 50,
+    });
+
+    return results.map((page) => {
+      const title = page.properties.title?.title?.map((t) => t.plain_text).join('') ?? '';
+      // title format: "Claude CLI · 2026-04-26 14:32"
+      const datePart = title.replace('Claude CLI · ', '');
+      return { id: page.id, title, date: datePart.slice(0, 10) };
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function getConversationById(pageId) {
+  const notion = getNotionClient();
+  try {
+    const { results: blocks } = await notion.blocks.children.list({ block_id: pageId });
+    const messages = [];
+    let current = null;
+
+    for (const block of blocks) {
+      if (block.type === 'heading_3') {
+        if (current) messages.push(current);
+        const text = block.heading_3.rich_text.map((r) => r.plain_text).join('');
+        const role = text.includes('You') ? 'user' : 'assistant';
+        current = { role, content: '' };
+      } else if (current) {
+        let text = '';
+        if (block.type === 'paragraph') {
+          text = block.paragraph.rich_text.map((r) => r.plain_text).join('');
+        } else if (block.type === 'code') {
+          const lang = block.code.language ?? '';
+          const code = block.code.rich_text.map((r) => r.plain_text).join('');
+          text = `\`\`\`${lang}\n${code}\n\`\`\``;
+        }
+        if (text) {
+          current.content = current.content ? `${current.content}\n\n${text}` : text;
+        }
+      }
+    }
+    if (current) messages.push(current);
+
+    return { id: pageId, messages };
+  } catch {
+    return null;
+  }
+}
+
 // ─── Daily Notes ─────────────────────────────────────────────────────────────
 
 /**
