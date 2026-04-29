@@ -1,0 +1,23 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "3001:3001"
+    volumes:
+      # Mount token files so OAuth state persists across container restarts
+      - ./ms-token.json:/app/ms-token.json
+      - ./google-credentials.json:/app/google-credentials.json
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+    restart: unless-stopped
