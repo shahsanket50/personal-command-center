@@ -6,6 +6,8 @@ import {
   getTravelEntries,
   saveBriefing,
   getLatestBriefingForDate,
+  listBriefings,
+  getBriefingById,
 } from '../services/notion.js';
 import { generateMorningBrief } from '../services/claude.js';
 
@@ -77,6 +79,27 @@ router.post('/generate', async (_req, res) => {
     res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
   } finally {
     res.end();
+  }
+});
+
+// GET /api/brief/history — list of all past morning briefs
+router.get('/history', async (_req, res) => {
+  try {
+    const list = await listBriefings();
+    res.json(list);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /api/brief/:id — fetch a specific brief by Notion page ID
+router.get('/:id', async (req, res) => {
+  try {
+    const brief = await getBriefingById(req.params.id);
+    if (!brief) return res.status(404).json({ error: 'not found' });
+    res.json(brief);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
