@@ -10,6 +10,7 @@ const FIELDS = {
     { key: 'ANTHROPIC_API_KEY',    label: 'Anthropic API Key',       secret: true,  placeholder: 'sk-ant-...' },
     { key: 'NOTION_API_KEY',       label: 'Notion API Key',          secret: true,  placeholder: 'secret_...' },
     { key: 'SLACK_BOT_TOKEN',      label: 'Slack Bot Token',         secret: true,  placeholder: 'xoxb-...' },
+    { key: 'SLACK_USER_TOKEN',     label: 'Slack User Token',        secret: true,  placeholder: 'xoxp-...' },
     { key: '_section_ms',          label: 'Microsoft 365 (Office)',  type: 'section' },
     { key: 'MS_ACCOUNT_OFFICE',    label: 'Office Email',            secret: false, placeholder: 'you@company.com' },
     { key: '_ms_token',            type: 'ms_token' },
@@ -69,11 +70,13 @@ export function SettingsPage() {
   const [notionTest, setNotionTest] = useState(null);
   const notionTestTimerRef = useRef(null);
   const [msToken, setMsToken] = useState('');
-  const [msTokenStatus, setMsTokenStatus] = useState(null); // { set, ageMinutes, expired }
+  const [msTokenStatus, setMsTokenStatus] = useState(null);
+  const [msTokenError, setMsTokenError] = useState(null);
 
   useEffect(() => {
     fetch(`${API}/settings`).then(r => r.json()).then(data => {
-      setValues(data.values ?? {});
+      const { _secrets, ...vals } = data;
+      setValues(vals ?? {});
     }).catch(() => {});
   }, []);
 
@@ -93,7 +96,7 @@ export function SettingsPage() {
   async function handleSave() {
     setSaveStatus('saving...');
     try {
-      const res = await fetch(`${API}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ values }) });
+      const res = await fetch(`${API}/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) });
       if (!res.ok) throw new Error(`save failed: ${res.status}`);
       setSaveStatus('saved'); setTimeout(() => setSaveStatus(''), 2000);
     } catch { setSaveStatus('error'); }
@@ -111,18 +114,23 @@ export function SettingsPage() {
 
   async function saveMsToken() {
     if (!msToken.trim()) return;
+    setMsTokenError(null);
     try {
       const res = await fetch(`${API}/settings/ms-token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: msToken.trim() }),
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         setMsTokenStatus(data);
         setMsToken('');
+      } else {
+        setMsTokenError(data.error ?? 'save failed');
       }
-    } catch { /* ignore */ }
+    } catch (e) {
+      setMsTokenError(e.message);
+    }
   }
 
   async function clearMsToken() {
@@ -176,6 +184,9 @@ export function SettingsPage() {
                     </button>
                   )}
                 </div>
+                {msTokenError && (
+                  <div style={{ fontSize: 11, color: T.danger, marginBottom: 6 }}>✕ {msTokenError}</div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 11, color: msTokenStatus?.expired ? T.warn : msTokenStatus?.set ? T.accent : T.textGhost }}>
                     {!msTokenStatus?.set

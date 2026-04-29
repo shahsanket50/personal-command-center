@@ -23,6 +23,7 @@ services:
     ports:
       - "3001:3001"
     volumes:
+      - ./.env:/app/.env
       - ./ms-token.json:/app/ms-token.json
       - ./google-credentials.json:/app/google-credentials.json
     restart: unless-stopped
