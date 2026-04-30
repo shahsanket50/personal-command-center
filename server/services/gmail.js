@@ -21,6 +21,7 @@ async function getGmailAuth() {
   } catch {
     return null;
   }
+  if (!tokens?.access_token && !tokens?.refresh_token) return null; // stub file — not connected
 
   const auth = new google.auth.OAuth2(clientId, clientSecret, GOOGLE_REDIRECT_URI);
   auth.setCredentials(tokens);

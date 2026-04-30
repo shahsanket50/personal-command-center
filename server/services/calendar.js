@@ -61,6 +61,7 @@ async function getAuthenticatedGoogleClient() {
   } catch {
     return null; // not connected
   }
+  if (!tokens?.access_token && !tokens?.refresh_token) return null; // stub file — not connected
   oauth2.setCredentials(tokens);
   // Persist refreshed tokens automatically
   oauth2.on('tokens', async (newTokens) => {
@@ -110,6 +111,9 @@ export async function getGoogleEvents(dateStr) {
  * @param {string} dateStr - 'YYYY-MM-DD'
  * @returns {CalEvent[]}
  */
+// MS Windows timezone name for IST — Graph Explorer uses this for Prefer header
+const MS_TIMEZONE = 'India Standard Time';
+
 export async function getMSEvents(dateStr) {
   let accessToken;
   try {
@@ -119,6 +123,8 @@ export async function getMSEvents(dateStr) {
     return [];
   }
 
+  // Pass naive datetimes — Prefer header tells Graph to interpret them as IST
+  // and return event times in IST, so no UTC conversion needed client-side.
   const startDateTime = `${dateStr}T00:00:00`;
   const endDateTime = `${dateStr}T23:59:59`;
   const url =
@@ -128,7 +134,10 @@ export async function getMSEvents(dateStr) {
     `&$orderby=start/dateTime&$top=50`;
 
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      Prefer: `outlook.timezone="${MS_TIMEZONE}"`,
+    },
   });
 
   if (!res.ok) return [];

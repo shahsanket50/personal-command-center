@@ -40,7 +40,7 @@ export async function getJoinedChannels() {
       types: 'im',
       exclude_archived: true,
       limit: 100,
-    }),
+    }).catch(() => ({ channels: [] })), // bot tokens may lack im:read scope
   ]);
 
   const all = [...(convResult.channels || []), ...(imResult.channels || [])];
